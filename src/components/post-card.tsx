@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 export interface Withdrawal {
+  username: string;
   amount: number;
   fee: number;
   totalDeducted: number;

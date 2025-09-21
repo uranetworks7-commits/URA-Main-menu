@@ -79,6 +79,7 @@ export function WithdrawDialog({
 
     try {
         const withdrawalData = {
+            username: currentUser.name,
             amount: values.amount,
             fee: fee,
             totalDeducted: totalDeducted,
@@ -136,7 +137,7 @@ export function WithdrawDialog({
                                  placeholder="e.g. 50" 
                                  {...field} 
                                  onChange={e => field.onChange(e.target.value === '' ? '' : e.target.valueAsNumber)}
-                                 value={field.value}
+                                 value={field.value === undefined || field.value === null ? '' : field.value}
                                />
                             </FormControl>
                             <FormMessage />
