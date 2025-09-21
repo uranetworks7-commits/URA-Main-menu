@@ -82,7 +82,7 @@ export function PostCard({ post }: PostCardProps) {
           </Avatar>
           <div>
             <p className="font-bold text-foreground">{post.user.name}</p>
-            <p className="text-xs text-muted-foreground">Sponsored · Just now</p>
+            <p className="text-xs text-muted-foreground">Published · Just now</p>
           </div>
         </div>
       </CardHeader>
