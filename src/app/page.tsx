@@ -111,14 +111,26 @@ export default function HomePage() {
         const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
         
         posts.forEach(post => {
-            if (post.createdAt > fiveDaysAgo && (post.views || 0) < 2000) {
-                const viewsRef = ref(db, `posts/${post.id}/views`);
-                const currentViews = post.views || 0;
-                const newViews = currentViews + Math.floor(Math.random() * 29) + 1;
+            const viewsRef = ref(db, `posts/${post.id}/views`);
+            const currentViews = post.views || 0;
+            let newViews = currentViews;
+
+            if ((post.createdAt || 0) > fiveDaysAgo) {
+                // For posts newer than 5 days, add 1-19 views.
+                newViews += Math.floor(Math.random() * 19) + 1;
+            } else {
+                // For posts older than 5 days, add 1-3 views occasionally.
+                if (Math.random() < 0.3) { // 30% chance to get a view
+                    newViews += Math.floor(Math.random() * 3) + 1;
+                }
+            }
+            
+            // Cap views at 2000
+            if (newViews > currentViews) {
                 set(viewsRef, Math.min(newViews, 2000));
             }
         });
-    }, 60000); // Update every minute to simulate daily increase
+    }, 1000 * 60 * 60 * 4); // Update every 4 hours to simulate daily increase
 
     return () => clearInterval(interval);
   }, [isClient, posts]);
