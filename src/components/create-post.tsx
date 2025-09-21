@@ -7,6 +7,7 @@ import { Separator } from './ui/separator';
 import { Textarea } from './ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import type { User } from './post-card';
+import { UraIcon } from './ura-icon';
 
 
 interface CreatePostProps {
@@ -30,7 +31,9 @@ export function CreatePost({ onCreatePost, currentUser }: CreatePostProps) {
         <div className="flex items-start gap-3">
           <Avatar>
             <AvatarImage src={currentUser.avatar} />
-            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>
+                {currentUser.avatar ? currentUser.name.charAt(0) : <UraIcon className="h-6 w-6" />}
+            </AvatarFallback>
           </Avatar>
           <div className="w-full">
             <Textarea

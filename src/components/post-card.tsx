@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from './ui/separator';
+import { UraIcon } from './ura-icon';
 
 export interface User {
   id: string;
@@ -44,6 +45,7 @@ export interface Post {
 interface PostCardProps {
   post: Post;
   currentUser: User;
+  onDeletePost: (postId: string) => void;
 }
 
 const parseCount = (countStr: string): number => {
@@ -68,7 +70,7 @@ const formatCount = (count: number): string => {
     return count.toString();
 };
 
-export function PostCard({ post, currentUser }: PostCardProps) {
+export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(parseCount(post.stats.likes));
   const [showComments, setShowComments] = useState(false);
@@ -107,7 +109,9 @@ export function PostCard({ post, currentUser }: PostCardProps) {
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarImage src={post.user.avatar} alt={post.user.name} />
-            <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>
+                {post.user.avatar ? post.user.name.charAt(0) : <UraIcon className="h-6 w-6" />}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <p className="font-bold text-foreground">{post.user.name}</p>
@@ -143,6 +147,15 @@ export function PostCard({ post, currentUser }: PostCardProps) {
                     <DollarSign className="mr-2 h-4 w-4" />
                     <span>₹{revenue.toFixed(2)} Revenue</span>
                  </DropdownMenuItem>
+              )}
+              {isPublisher && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onDeletePost(post.id)} className="text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Delete Post</span>
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

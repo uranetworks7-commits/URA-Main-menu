@@ -242,12 +242,30 @@ export default function HomePage() {
     };
     setPosts([newPost, ...posts]);
   };
+  
+  const handleDeletePost = (postId: string) => {
+    setPosts(posts.filter(post => post.id !== postId));
+  };
+
+  const handleUpdateProfile = (name: string, avatarUrl: string) => {
+    if (!currentUser) return;
+    const updatedUser = { ...currentUser, name, avatar: avatarUrl };
+    setCurrentUser(updatedUser);
+
+    // Update user info on their posts as well
+    setPosts(posts.map(post => {
+      if (post.user.id === currentUser.id) {
+        return { ...post, user: updatedUser };
+      }
+      return post;
+    }));
+  };
 
   const handleLogin = (name: string, avatarUrl?: string) => {
     const newUser: User = {
       id: `user-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`,
       name: name,
-      avatar: avatarUrl || `https://i.pravatar.cc/150?u=${name}`
+      avatar: avatarUrl || '',
     };
     setCurrentUser(newUser);
   };
@@ -255,7 +273,6 @@ export default function HomePage() {
   const handleLogout = () => {
     setCurrentUser(null);
   };
-
 
   if (!currentUser) {
     return <LoginPage onLogin={handleLogin} />;
@@ -265,12 +282,21 @@ export default function HomePage() {
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar currentUser={currentUser} onLogout={handleLogout} />
+        <LeftSidebar 
+            currentUser={currentUser} 
+            onLogout={handleLogout}
+            onUpdateProfile={handleUpdateProfile}
+        />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <CreatePost onCreatePost={handleCreatePost} currentUser={currentUser} />
             <div className="space-y-4 mt-4">
               {posts.map((post) => (
-                <PostCard key={post.id} post={post} currentUser={currentUser} />
+                <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    currentUser={currentUser}
+                    onDeletePost={handleDeletePost}
+                />
               ))}
             </div>
         </main>
