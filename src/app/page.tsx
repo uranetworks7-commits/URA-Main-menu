@@ -14,7 +14,7 @@ import { Search } from 'lucide-react';
 
 const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     {
-    user: { id: 'user-1', name: 'URA Studio', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+    user: { id: 'user-1', name: 'URA Studio', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', isMonetized: false, totalViews: 0, totalLikes: 0 },
     content: 'Welcome to the new URA Social platform! This is the beginning of something amazing. We are building a community-focused social network.',
     image: 'https://picsum.photos/seed/1/800/600',
     imageHint: 'abstract tech',
@@ -23,7 +23,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     views: 1200,
   },
   {
-    user: { id: 'user-2', name: 'Dev Team', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704e' },
+    user: { id: 'user-2', name: 'Dev Team', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704e', isMonetized: false, totalViews: 0, totalLikes: 0 },
     content: 'Just pushed a major update! The feed now looks cleaner and loads faster. Let us know what you think of the new design. #webdev #react #nextjs',
     image: 'https://picsum.photos/seed/2/800/500',
     imageHint: 'coding computer',
@@ -32,7 +32,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     views: 876,
   },
   {
-    user: { id: 'user-publisher', name: 'Original Publisher', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c' },
+    user: { id: 'user-publisher', name: 'Original Publisher', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c', isMonetized: true, totalViews: 0, totalLikes: 0 },
     content: 'Having fun building this new social app. What feature should I add next? Here is a post where I should be able to see revenue.',
     image: 'https://picsum.photos/seed/sub/800/600',
     imageHint: 'developer coding',
@@ -74,7 +74,15 @@ export default function HomePage() {
     if (isClient) {
       const savedUser = localStorage.getItem('currentUser');
       if (savedUser) {
-        setCurrentUser(JSON.parse(savedUser));
+        const user = JSON.parse(savedUser);
+        const userRef = ref(db, `users/${user.id}`);
+        onValue(userRef, (snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                setCurrentUser(userData);
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+            }
+        });
       }
 
       const postsRef = ref(db, 'posts');
@@ -100,6 +108,36 @@ export default function HomePage() {
       });
     }
   }, [isClient]);
+
+  // Update user stats periodically
+    useEffect(() => {
+        if (!currentUser || posts.length === 0) return;
+
+        const interval = setInterval(() => {
+            const userPosts = posts.filter(p => p.user.id === currentUser.id);
+            const totalViews = userPosts.reduce((acc, post) => acc + (post.views || 0), 0);
+            const totalLikes = userPosts.reduce((acc, post) => acc + Object.keys(post.likes || {}).length, 0);
+            const canBeMonetized = userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 25);
+            
+            const userRef = ref(db, `users/${currentUser.id}`);
+            const updates: Partial<User> = {};
+
+            if (totalViews !== currentUser.totalViews) updates.totalViews = totalViews;
+            if (totalLikes !== currentUser.totalLikes) updates.totalLikes = totalLikes;
+            if (canBeMonetized && !currentUser.isMonetized) {
+                // This is an example of auto-monetization. A manual request flow is in analytics page.
+                // updates.isMonetized = true; 
+            }
+            
+            if (Object.keys(updates).length > 0) {
+                update(userRef, updates);
+            }
+
+        }, 1000 * 30); // Update every 30 seconds
+
+        return () => clearInterval(interval);
+
+    }, [posts, currentUser]);
   
   // Automatic view increase simulation
   useEffect(() => {
@@ -125,7 +163,7 @@ export default function HomePage() {
             
             // Cap views at 2000
             if (newViews > currentViews) {
-                set(viewsRef, Math.min(newViews, 2000));
+                update(ref(db, `posts/${post.id}`), { views: Math.min(newViews, 2000) });
             }
         });
     }, 1000 * 60 * 60 * 4); // Update every 4 hours to simulate daily increase
@@ -155,10 +193,10 @@ export default function HomePage() {
       createdAt: Date.now(),
     };
 
-    if (mediaType === 'image') {
-      newPostData.image = mediaUrl || `https://picsum.photos/seed/${Date.now()}/800/600`;
-    } else if (mediaType === 'video') {
-      newPostData.video = mediaUrl || 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    if (mediaType === 'image' && mediaUrl) {
+      newPostData.image = mediaUrl;
+    } else if (mediaType === 'video' && mediaUrl) {
+      newPostData.video = mediaUrl;
     }
     
     const newPostRef = push(ref(db, 'posts'));
@@ -219,8 +257,7 @@ export default function HomePage() {
     const userRef = ref(db, `users/${currentUser.id}`);
     update(userRef, { name, avatar: avatarUrl });
 
-    setCurrentUser(updatedUser);
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    // No need to call setCurrentUser here, onValue listener will do it.
     
     toast({
       title: "Profile Updated",
@@ -234,14 +271,18 @@ export default function HomePage() {
       id: userId,
       name: name,
       avatar: avatarUrl || `https://placehold.co/150x150/222/fff?text=${name.charAt(0).toUpperCase()}`,
+      isMonetized: false,
+      totalViews: 0,
+      totalLikes: 0,
     };
     
     // Save user to Firebase
     const userRef = ref(db, `users/${userId}`);
     set(userRef, newUser);
     
-    setCurrentUser(newUser);
+    // The onValue listener will update the currentUser state.
     localStorage.setItem('currentUser', JSON.stringify(newUser));
+    setCurrentUser(newUser);
   };
   
   const handleLogout = () => {

@@ -27,6 +27,9 @@ export interface User {
   id: string;
   name: string;
   avatar: string;
+  isMonetized?: boolean;
+  totalViews?: number;
+  totalLikes?: number;
 }
 export interface Comment {
     id: string;
@@ -126,7 +129,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPostMonetized = useMemo(() => viewsCount > 1000 && likesCount >= 25, [viewsCount, likesCount]);
 
   let revenue = 0;
-  if (isPostMonetized) {
+  if (currentUser.isMonetized && isPostMonetized) {
       revenue = (viewsCount / 1000) * 25;
   }
   

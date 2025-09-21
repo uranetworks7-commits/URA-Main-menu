@@ -16,7 +16,7 @@ import {
   BadgeCheck,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
@@ -51,18 +51,9 @@ const settingLinks = [
 
 export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts }: LeftSidebarProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isMonetized, setIsMonetized] = useState(false);
-
-  useEffect(() => {
-    if (currentUser) {
-      const monetizationStatus = localStorage.getItem(`monetized_${currentUser.id}`);
-      setIsMonetized(monetizationStatus === 'true');
-    }
-  }, [currentUser]);
-
 
   const totalRevenue = useMemo(() => {
-    if (!isMonetized) return 0;
+    if (!currentUser?.isMonetized || !userPosts) return 0;
     return userPosts.reduce((total, post) => {
         const views = post.views || 0;
         const likes = Object.keys(post.likes || {}).length;
@@ -73,7 +64,7 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
         }
         return total;
     }, 0);
-  }, [userPosts, isMonetized]);
+  }, [userPosts, currentUser?.isMonetized]);
 
   if (!currentUser) return null;
 
@@ -107,7 +98,7 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
             <CardContent className="space-y-2">
                  <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Account Status</span>
-                     {isMonetized ? (
+                     {currentUser.isMonetized ? (
                         <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
                             <BadgeCheck className="mr-1 h-3 w-3"/>
                             Monetized

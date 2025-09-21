@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, update } from "firebase/database";
 import type { Post, User } from '@/components/post-card';
 import { Header } from '@/components/header';
 import { LeftSidebar } from '@/components/left-sidebar';
@@ -19,7 +19,6 @@ export default function AnalyticsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [isMonetized, setIsMonetized] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -28,11 +27,14 @@ export default function AnalyticsPage() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       const user = JSON.parse(savedUser);
-      setCurrentUser(user);
-      const monetizationStatus = localStorage.getItem(`monetized_${user.id}`);
-      setIsMonetized(monetizationStatus === 'true');
+       const userRef = ref(db, `users/${user.id}`);
+        onValue(userRef, (snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                setCurrentUser(userData);
+            }
+        });
     } else {
-        // If no user, redirect to home to login
         router.push('/');
     }
   }, [router]);
@@ -66,8 +68,8 @@ export default function AnalyticsPage() {
   const handleRequestMonetization = () => {
     if (!currentUser) return;
     if (canBeMonetized) {
-      localStorage.setItem(`monetized_${currentUser.id}`, 'true');
-      setIsMonetized(true);
+      const userRef = ref(db, `users/${currentUser.id}`);
+      update(userRef, { isMonetized: true });
       toast({
         title: "Congratulations!",
         description: "Your account is now monetized.",
@@ -97,8 +99,8 @@ export default function AnalyticsPage() {
     return total;
   }, 0);
 
-  const totalViews = userPosts.reduce((total, post) => total + (post.views || 0), 0);
-  const totalLikes = userPosts.reduce((total, post) => total + Object.keys(post.likes || {}).length, 0);
+  const totalViews = currentUser.totalViews || 0;
+  const totalLikes = currentUser.totalLikes || 0;
 
 
   return (
@@ -111,8 +113,6 @@ export default function AnalyticsPage() {
         }}
         onUpdateProfile={() => {}} // Not needed on this page
         userPosts={userPosts}
-        searchQuery=""
-        setSearchQuery={() => {}} // Not needed on this page
       />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar 
@@ -138,7 +138,7 @@ export default function AnalyticsPage() {
                             </div>
                         </div>
                         <div>
-                        {isMonetized ? (
+                        {currentUser.isMonetized ? (
                             <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
                                 <BadgeCheck className="mr-1 h-3 w-3"/>
                                 Monetized
@@ -157,8 +157,8 @@ export default function AnalyticsPage() {
                                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">₹{isMonetized ? totalRevenue.toFixed(2) : '0.00'}</div>
-                                <p className="text-xs text-muted-foreground">{isMonetized ? `from ${userPosts.filter(p => (p.views || 0) > 1000 && Object.keys(p.likes || {}).length >= 25).length} monetized posts` : "Account not monetized"}</p>
+                                <div className="text-2xl font-bold">₹{currentUser.isMonetized ? totalRevenue.toFixed(2) : '0.00'}</div>
+                                <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `from ${userPosts.filter(p => (p.views || 0) > 1000 && Object.keys(p.likes || {}).length >= 25).length} monetized posts` : "Account not monetized"}</p>
                             </CardContent>
                         </Card>
                         <Card>
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
                                 const isPostMonetized = views > 1000 && likes >= 25;
-                                const revenue = isMonetized && isPostMonetized ? (views / 1000) * 25 : 0;
+                                const revenue = currentUser.isMonetized && isPostMonetized ? (views / 1000) * 25 : 0;
                                 
                                 return (
                                     <TableRow key={post.id}>
