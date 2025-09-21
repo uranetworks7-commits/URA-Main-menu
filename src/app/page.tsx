@@ -11,10 +11,11 @@ import { LoginPage } from '@/components/login-page';
 import { useToast } from "@/hooks/use-toast";
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { UraIcon } from '@/components/ura-icon';
 
 const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     {
-    user: { id: 'user-1', name: 'URA Studio', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', isMonetized: false, totalViews: 0, totalLikes: 0 },
+    user: { id: 'user-1', name: 'URA Studio', avatar: `https://placehold.co/150x150/222/fff?text=U`, isMonetized: false, totalViews: 0, totalLikes: 0 },
     content: 'Welcome to the new URA Social platform! This is the beginning of something amazing. We are building a community-focused social network.',
     image: 'https://picsum.photos/seed/1/800/600',
     imageHint: 'abstract tech',
@@ -23,7 +24,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     views: 1200,
   },
   {
-    user: { id: 'user-2', name: 'Dev Team', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704e', isMonetized: false, totalViews: 0, totalLikes: 0 },
+    user: { id: 'user-2', name: 'Dev Team', avatar: `https://placehold.co/150x150/222/fff?text=D`, isMonetized: false, totalViews: 0, totalLikes: 0 },
     content: 'Just pushed a major update! The feed now looks cleaner and loads faster. Let us know what you think of the new design. #webdev #react #nextjs',
     image: 'https://picsum.photos/seed/2/800/500',
     imageHint: 'coding computer',
@@ -32,7 +33,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     views: 876,
   },
   {
-    user: { id: 'user-publisher', name: 'Original Publisher', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c', isMonetized: true, totalViews: 0, totalLikes: 0 },
+    user: { id: 'user-publisher', name: 'Original Publisher', avatar: `https://placehold.co/150x150/222/fff?text=O`, isMonetized: true, totalViews: 0, totalLikes: 0 },
     content: 'Having fun building this new social app. What feature should I add next? Here is a post where I should be able to see revenue.',
     image: 'https://picsum.photos/seed/sub/800/600',
     imageHint: 'developer coding',
@@ -42,6 +43,19 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
   },
 ];
 
+function LoadingScreen() {
+    return (
+        <div className="fixed inset-0 bg-background flex items-center justify-center z-[100]">
+            <div className="flex flex-col items-center gap-4">
+                <svg className="x-loader h-24 w-24 text-primary" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 20 20 L 80 80" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                    <path d="M 80 20 L 20 80" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                </svg>
+                <h1 className="text-3xl font-bold text-primary animate-pulse">URA-X</h1>
+            </div>
+        </div>
+    )
+}
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -49,9 +63,13 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
 
   useEffect(() => {
     setIsClient(true);
+    const timer = setTimeout(() => setIsLoading(false), 2000); // Simulate loading for 2 seconds
+    return () => clearTimeout(timer);
   }, []);
   
   const getTodayPostCount = useCallback(() => {
@@ -175,10 +193,10 @@ export default function HomePage() {
     if (!currentUser) return;
     
     const postCount = getTodayPostCount();
-    if (postCount >= 1) {
+    if (postCount >= 2) {
       toast({
         title: "Post Limit Reached",
-        description: "You can only create up to 1 post per day.",
+        description: "You can only create up to 2 posts per day.",
         variant: "destructive",
       });
       return;
@@ -305,8 +323,8 @@ export default function HomePage() {
   }, [posts, searchQuery]);
 
 
-  if (!isClient) {
-    return null; // or a loading spinner
+  if (!isClient || isLoading) {
+    return <LoadingScreen />; 
   }
 
   if (!currentUser) {

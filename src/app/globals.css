@@ -58,3 +58,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes draw-x-1 {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes draw-x-2 {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.x-loader path:nth-child(1) {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: draw-x-1 0.5s ease-in-out forwards;
+}
+
+.x-loader path:nth-child(2) {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: draw-x-2 0.5s ease-in-out 0.5s forwards;
+}

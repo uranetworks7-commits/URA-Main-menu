@@ -42,7 +42,7 @@ export function CreatePost({ onCreatePost, currentUser, postCountToday }: Create
     }
   };
 
-  const postLimit = 1;
+  const postLimit = 2;
 
   return (
     <>
