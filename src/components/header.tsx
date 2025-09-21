@@ -8,7 +8,7 @@ import { LeftSidebar } from './left-sidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { ProfileSettingsDialog } from './profile-settings-dialog';
-import type { User } from './post-card';
+import type { User, Post } from './post-card';
 import { useState } from 'react';
 import { UraIcon } from './ura-icon';
 
@@ -16,10 +16,11 @@ interface HeaderProps {
   currentUser: User | null;
   onLogout: () => void;
   onUpdateProfile: (name: string, avatarUrl: string) => void;
+  userPosts: Post[];
 }
 
 
-export function Header({ currentUser, onLogout, onUpdateProfile }: HeaderProps) {
+export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: HeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between h-14 px-4 bg-card border-b border-border shadow-sm">
@@ -33,7 +34,7 @@ export function Header({ currentUser, onLogout, onUpdateProfile }: HeaderProps) 
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64 bg-card">
             <SheetTitle className="sr-only">Menu</SheetTitle>
-            {currentUser && <LeftSidebar currentUser={currentUser} onLogout={onLogout} onUpdateProfile={onUpdateProfile} />}
+            {currentUser && <LeftSidebar currentUser={currentUser} onLogout={onLogout} onUpdateProfile={onUpdateProfile} userPosts={userPosts} />}
           </SheetContent>
         </Sheet>
         <div className="flex items-center gap-2">

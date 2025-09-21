@@ -254,6 +254,7 @@ export default function HomePage() {
         currentUser={currentUser}
         onLogout={handleLogout}
         onUpdateProfile={handleUpdateProfile}
+        userPosts={userPosts}
       />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar 
