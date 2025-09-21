@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -18,6 +18,9 @@ import { Separator } from './ui/separator';
 import { UraIcon } from './ura-icon';
 import { Input } from './ui/input';
 import { formatDistanceToNow } from 'date-fns';
+import { ReportDialog } from './report-dialog';
+import { useToast } from '@/hooks/use-toast';
+
 
 export interface User {
   id: string;
@@ -49,6 +52,7 @@ interface PostCardProps {
   onDeletePost: (postId: string) => void;
   onLikePost: (postId: string) => void;
   onAddComment: (postId: string, commentText: string) => void;
+  onReportPost: (postId: string, reason: string) => void;
 }
 
 const parseCount = (count: number | string): number => {
@@ -74,9 +78,12 @@ const formatCount = (count: number): string => {
     return count.toString();
 };
 
-export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment }: PostCardProps) {
+export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onReportPost }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const { toast } = useToast();
+
   
   const likesCount = useMemo(() => Object.keys(post.likes || {}).length, [post.likes]);
   const isLiked = useMemo(() => currentUser && post.likes && post.likes[currentUser.id], [currentUser, post.likes]);
@@ -99,6 +106,23 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
       setCommentText('');
     }
   };
+  
+  const handleCodeReport = (code: string) => {
+    if (code === '225') {
+      onDeletePost(post.id);
+      setIsReportDialogOpen(false);
+      toast({
+        title: "Post Reported and Deleted",
+        description: "The post has been successfully reported and removed.",
+      });
+    } else {
+      toast({
+        title: "Invalid Code",
+        description: "The report code you entered is incorrect.",
+        variant: "destructive",
+      });
+    }
+  };
 
 
   const isPublisher = post.user.id === currentUser.id;
@@ -106,7 +130,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   
   let revenue = 0;
   if (isPublisher) {
-      if (viewsCount > 1000 && viewsCount < 2000) {
+      if (viewsCount > 1000 && viewsCount <= 2000) {
           revenue = 25;
       }
   }
@@ -135,48 +159,57 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
             <p className="font-bold text-foreground">{post.user.name}</p>
             <p className="text-xs text-muted-foreground">Published · {timeAgo}</p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Post Details</DropdownMenuLabel>
-               <DropdownMenuItem>
-                 <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                 <span>Published</span>
-               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem disabled>
-                <Eye className="mr-2 h-4 w-4" />
-                <span>{formatCount(viewsCount)} Views</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <ThumbsUp className="mr-2 h-4 w-4" />
-                <span>{formatCount(likesCount)} Likes</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <MessageSquare className="mr-2 h-4 w-4" />
-                <span>{formatCount(sortedComments.length)} Comments</span>
-              </DropdownMenuItem>
-              {isPublisher && revenue > 0 && (
-                 <DropdownMenuItem disabled className="text-green-500">
-                    <DollarSign className="mr-2 h-4 w-4" />
-                    <span>₹{revenue.toFixed(2)} Revenue</span>
+          <ReportDialog
+            isOpen={isReportDialogOpen}
+            onOpenChange={setIsReportDialogOpen}
+            onTextReport={(reason) => onReportPost(post.id, reason)}
+            onCodeReport={handleCodeReport}
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Post Details</DropdownMenuLabel>
+                 <DropdownMenuItem>
+                   <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                   <span>Published</span>
                  </DropdownMenuItem>
-              )}
-              {isPublisher && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onDeletePost(post.id)} className="text-destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>Delete Post</span>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled>
+                  <Eye className="mr-2 h-4 w-4" />
+                  <span>{formatCount(viewsCount)} Views</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  <ThumbsUp className="mr-2 h-4 w-4" />
+                  <span>{formatCount(likesCount)} Likes</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  <span>{formatCount(sortedComments.length)} Comments</span>
+                </DropdownMenuItem>
+                {isPublisher && revenue > 0 && (
+                   <DropdownMenuItem disabled className="text-green-500">
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      <span>₹{revenue.toFixed(2)} Revenue</span>
+                   </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                {isPublisher && (
+                    <DropdownMenuItem onClick={() => onDeletePost(post.id)} className="text-destructive">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete Post</span>
+                    </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onSelect={() => setIsReportDialogOpen(true)} className="text-amber-500">
+                  <ShieldAlert className="mr-2 h-4 w-4" />
+                  <span>Report Post</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ReportDialog>
         </div>
       </CardHeader>
       <CardContent className="px-4 pt-0 pb-2">

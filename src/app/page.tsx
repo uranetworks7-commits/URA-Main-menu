@@ -151,6 +151,20 @@ export default function HomePage() {
     const postRef = ref(db, `posts/${postId}`);
     remove(postRef);
   };
+  
+  const handleReportPost = (postId: string, reason: string) => {
+    const reportsRef = ref(db, `reports/${postId}`);
+    const newReportRef = push(reportsRef);
+    set(newReportRef, {
+      reason,
+      reportedBy: currentUser?.id,
+      timestamp: Date.now(),
+    });
+    toast({
+      title: "Post Reported",
+      description: "Thank you for your feedback. We will review this post.",
+    });
+  };
 
   const handleLikePost = (postId: string) => {
     if (!currentUser) return;
@@ -182,16 +196,32 @@ export default function HomePage() {
   const handleUpdateProfile = (name: string, avatarUrl: string) => {
     if (!currentUser) return;
     const updatedUser = { ...currentUser, name, avatar: avatarUrl };
+    
+    // Update user in Firebase DB
+    const userRef = ref(db, `users/${currentUser.id}`);
+    update(userRef, { name, avatar: avatarUrl });
+
     setCurrentUser(updatedUser);
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    
+    toast({
+      title: "Profile Updated",
+      description: "Your profile has been successfully updated.",
+    });
   };
 
   const handleLogin = (name: string, avatarUrl?: string) => {
+    const userId = `user-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`;
     const newUser: User = {
-      id: `user-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`,
+      id: userId,
       name: name,
       avatar: avatarUrl || '',
     };
+    
+    // Save user to Firebase
+    const userRef = ref(db, `users/${userId}`);
+    set(userRef, newUser);
+    
     setCurrentUser(newUser);
     localStorage.setItem('currentUser', JSON.stringify(newUser));
   };
@@ -239,6 +269,7 @@ export default function HomePage() {
                     onDeletePost={handleDeletePost}
                     onLikePost={handleLikePost}
                     onAddComment={handleAddComment}
+                    onReportPost={handleReportPost}
                 />
               ))}
             </div>
