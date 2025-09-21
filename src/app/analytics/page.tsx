@@ -40,7 +40,7 @@ export default function AnalyticsPage() {
   }, [router]);
 
   useEffect(() => {
-    if (isClient && currentUser) {
+    if (isClient) {
       const postsRef = ref(db, 'posts');
       onValue(postsRef, (snapshot) => {
         const data = snapshot.val();
@@ -49,12 +49,11 @@ export default function AnalyticsPage() {
             id: key,
             ...data[key]
           }));
-          const userPosts = allPosts.filter(post => post.user.id === currentUser.id);
-          setPosts(userPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)));
+          setPosts(allPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)));
         }
       });
     }
-  }, [isClient, currentUser]);
+  }, [isClient]);
   
   const userPosts = useMemo(() => {
     if (!currentUser) return [];
@@ -70,6 +69,7 @@ export default function AnalyticsPage() {
     if (canBeMonetized) {
       const userRef = ref(db, `users/${currentUser.id}`);
       update(userRef, { isMonetized: true });
+      setCurrentUser(prev => prev ? { ...prev, isMonetized: true } : null);
       toast({
         title: "Congratulations!",
         description: "Your account is now monetized.",
