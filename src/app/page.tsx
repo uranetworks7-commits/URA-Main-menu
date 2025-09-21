@@ -177,8 +177,7 @@ export default function HomePage() {
           setPosts(postsList.reverse());
         } else {
           // Seed the database if it's empty
-          const postsToSeed: { [key: string]: Omit<Post, 'id'> } = {};
-          initialPosts.forEach((post, index) => {
+          initialPosts.forEach((post) => {
             const newPostRef = push(ref(db, 'posts'));
             if(newPostRef.key) {
                  set(newPostRef, post);
@@ -251,7 +250,7 @@ export default function HomePage() {
             onUpdateProfile={handleUpdateProfile}
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-            <CreatePost onCreatePost={handleCreate-post} currentUser={currentUser} />
+            <CreatePost onCreatePost={handleCreatePost} currentUser={currentUser} />
             <div className="space-y-4 mt-4">
               {posts.map((post) => (
                 <PostCard 
