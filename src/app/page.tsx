@@ -202,12 +202,12 @@ export default function HomePage() {
       return;
     }
 
-    const newPostData: Omit<Post, 'id'> = {
+    const newPostData: Omit<Post, 'id' | 'image' | 'video'> & { image?: string; video?: string } = {
       user: currentUser,
       content,
       likes: {},
       comments: {},
-      views: 0,
+      views: Math.floor(Math.random() * 16),
       createdAt: Date.now(),
     };
 
