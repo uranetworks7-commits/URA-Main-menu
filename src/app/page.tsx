@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '@/lib/firebase';
-import { ref, onValue, set, push, remove, update } from "firebase/database";
+import { ref, onValue, set, push, remove, update, query, orderByChild, equalTo, get } from "firebase/database";
 import { LeftSidebar } from '@/components/left-sidebar';
 import { RightSidebar } from '@/components/right-sidebar';
 import { PostCard, Post, User, Comment } from '@/components/post-card';
@@ -204,7 +204,7 @@ export default function HomePage() {
       return;
     }
 
-    const newPostData: Omit<Post, 'id'> & { image?: string; video?: string } = {
+    const newPostData: Omit<Post, 'id'> = {
       user: currentUser,
       content,
       likes: {},
@@ -214,9 +214,9 @@ export default function HomePage() {
     };
 
     if (mediaType === 'image' && mediaUrl) {
-      newPostData.image = mediaUrl;
+      (newPostData as any).image = mediaUrl;
     } else if (mediaType === 'video' && mediaUrl) {
-      newPostData.video = mediaUrl;
+      (newPostData as any).video = mediaUrl;
     }
     
     const newPostRef = push(ref(db, 'posts'));
@@ -284,24 +284,36 @@ export default function HomePage() {
     });
   };
 
-  const handleLogin = (name: string, avatarUrl?: string) => {
-    const userId = `user-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`;
-    const newUser: User = {
-      id: userId,
-      name: name,
-      avatar: avatarUrl || `https://placehold.co/150x150/222/fff?text=${name.charAt(0).toUpperCase()}`,
-      isMonetized: false,
-      totalViews: 0,
-      totalLikes: 0,
-    };
-    
-    // Save user to Firebase
-    const userRef = ref(db, `users/${userId}`);
-    set(userRef, newUser);
-    
-    // The onValue listener will update the currentUser state.
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-    setCurrentUser(newUser);
+  const handleLogin = async (name: string, avatarUrl?: string) => {
+    const usersRef = ref(db, 'users');
+    const q = query(usersRef, orderByChild('name'), equalTo(name));
+    const snapshot = await get(q);
+
+    if (snapshot.exists()) {
+      // User exists, log them in
+      const userData = snapshot.val();
+      const userId = Object.keys(userData)[0];
+      const existingUser = userData[userId];
+      localStorage.setItem('currentUser', JSON.stringify(existingUser));
+      setCurrentUser(existingUser);
+    } else {
+      // User does not exist, create new user
+      const userId = `user-${name.toLowerCase().replace(/\s/g, '-')}`;
+      const newUser: User = {
+        id: userId,
+        name: name,
+        avatar: avatarUrl || `https://placehold.co/150x150/222/fff?text=${name.charAt(0).toUpperCase()}`,
+        isMonetized: false,
+        totalViews: 0,
+        totalLikes: 0,
+      };
+      
+      const userRef = ref(db, `users/${userId}`);
+      await set(userRef, newUser);
+      
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+      setCurrentUser(newUser);
+    }
   };
   
   const handleLogout = () => {
