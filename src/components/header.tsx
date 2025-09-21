@@ -3,7 +3,7 @@
 import { Search, Home, Users, Clapperboard, Store, Bell, MessageCircle, UserCircle, Menu } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
 import { LeftSidebar } from './left-sidebar';
 
 export function Header() {
@@ -18,6 +18,7 @@ export function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64 bg-card">
+            <SheetTitle className="sr-only">Menu</SheetTitle>
             <LeftSidebar />
           </SheetContent>
         </Sheet>
