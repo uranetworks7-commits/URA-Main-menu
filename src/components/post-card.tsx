@@ -186,7 +186,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
 
   const secondsSinceCreation = (Date.now() - (post.createdAt || Date.now())) / 1000;
   const isPublishing = secondsSinceCreation < 15;
-  const isCountingViews = secondsSinceCreation < 60;
+  const showStats = secondsSinceCreation >= 60;
 
   return (
     <Card>
@@ -230,10 +230,10 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                     </DropdownMenuItem>
                  )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled>
-                  <Eye className="mr-2 h-4 w-4" />
-                  <span>{formatCount(viewsCount)} Views</span>
-                </DropdownMenuItem>
+                 <DropdownMenuItem disabled>
+                   <Eye className="mr-2 h-4 w-4" />
+                   <span>{showStats ? `${formatCount(viewsCount)} Views` : 'Counting Views...'}</span>
+                 </DropdownMenuItem>
                 <DropdownMenuItem disabled>
                   <ThumbsUp className="mr-2 h-4 w-4" />
                   <span>{formatCount(likesCount)} Likes</span>
@@ -242,12 +242,12 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                   <MessageSquare className="mr-2 h-4 w-4" />
                   <span>{formatCount(sortedComments.length)} Comments</span>
                 </DropdownMenuItem>
-                {isPublisher && post.user.isMonetized && (
-                   <DropdownMenuItem disabled className="text-green-500">
-                      <DollarSign className="mr-2 h-4 w-4" />
-                      <span>₹{revenue.toFixed(2)} Revenue</span>
-                   </DropdownMenuItem>
-                )}
+                 {isPublisher && post.user.isMonetized && (
+                    <DropdownMenuItem disabled className={cn(showStats ? "text-green-500" : "text-muted-foreground")}>
+                       <DollarSign className="mr-2 h-4 w-4" />
+                       <span>{showStats ? `₹${revenue.toFixed(2)} Revenue` : 'Calculating Revenue...'}</span>
+                    </DropdownMenuItem>
+                 )}
                 <DropdownMenuSeparator />
                 {isPublisher && (
                    <DropdownMenuItem onClick={() => router.push('/analytics')}>
@@ -302,17 +302,19 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           <button onClick={handleToggleComments} className="hover:underline">
             {formatCount(sortedComments.length)} Comments
           </button>
-          {!isPublishing && (
-            <div className="flex items-center gap-1">
-              <Eye className={cn("h-4 w-4", isCountingViews && "text-muted-foreground/50")} />
-              <span>{formatCount(viewsCount)}</span>
-            </div>
-          )}
-          {isPublisher && post.user.isMonetized && (
-             <div className="flex items-center gap-1 text-green-500">
-               <DollarSign className="h-4 w-4" />
-               <span>₹{revenue.toFixed(2)} Revenue</span>
-             </div>
+          {showStats && (
+            <>
+                <div className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  <span>{formatCount(viewsCount)}</span>
+                </div>
+                {isPublisher && post.user.isMonetized && revenue > 0 && (
+                   <div className="flex items-center gap-1 text-green-500">
+                     <DollarSign className="h-4 w-4" />
+                     <span>₹{revenue.toFixed(2)} Revenue</span>
+                   </div>
+                )}
+            </>
           )}
         </div>
       </div>
