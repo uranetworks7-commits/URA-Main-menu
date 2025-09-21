@@ -32,6 +32,7 @@ export default function AnalyticsPage() {
             const userData = snapshot.val();
             if (userData) {
                 setCurrentUser(userData);
+                localStorage.setItem('currentUser', JSON.stringify(userData));
             }
         });
     } else {
