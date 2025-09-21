@@ -11,20 +11,23 @@ import {
   Settings,
   ShieldQuestion,
   LogOut,
+  DollarSign
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { ProfileSettingsDialog } from './profile-settings-dialog';
-import type { User } from './post-card';
+import type { User, Post } from './post-card';
 import { UraIcon } from './ura-icon';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface LeftSidebarProps {
     currentUser: User | null;
     onLogout: () => void;
     onUpdateProfile: (name: string, avatarUrl: string) => void;
+    userPosts: Post[];
 }
 
 const mainLinks = [
@@ -42,11 +45,17 @@ const settingLinks = [
   { icon: ShieldQuestion, label: 'Help & Support' },
 ];
 
-export function LeftSidebar({ currentUser, onLogout, onUpdateProfile }: LeftSidebarProps) {
+export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts }: LeftSidebarProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // If currentUser is null, don't render anything.
-  // This can happen in the mobile sheet view if the user is not logged in.
+  const totalRevenue = useMemo(() => {
+    return userPosts.reduce((total, post) => {
+        const views = post.views || 0;
+        const postRevenue = (views / 1000) * 25;
+        return total + postRevenue;
+    }, 0);
+  }, [userPosts]);
+
   if (!currentUser) return null;
 
   return (
@@ -72,10 +81,24 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile }: LeftSide
           ))}
         </nav>
         <Separator className="my-4" />
-        <h3 className="px-3 text-sm font-semibold text-muted-foreground">Your shortcuts</h3>
-        <nav className="space-y-1 mt-2">
-            {/* Placeholder for shortcuts */}
-        </nav>
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-base">Your Content & Revenue</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+                 <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Total Posts</span>
+                    <span className="font-bold">{userPosts.length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Total Revenue</span>
+                    <span className="font-bold text-green-500 flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        {totalRevenue.toFixed(2)}
+                    </span>
+                </div>
+            </CardContent>
+        </Card>
         <Separator className="my-4" />
         <nav className="space-y-1">
           {currentUser && (

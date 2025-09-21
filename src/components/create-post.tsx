@@ -12,7 +12,7 @@ import { Progress } from './ui/progress';
 
 
 interface CreatePostProps {
-  onCreatePost: (content: string) => void;
+  onCreatePost: (content: string, mediaType?: 'image' | 'video', mediaUrl?: string) => void;
   currentUser: User;
   postCountToday: number;
 }
@@ -22,13 +22,19 @@ export function CreatePost({ onCreatePost, currentUser, postCountToday }: Create
 
   const handlePost = () => {
     if (postContent.trim()) {
-      onCreatePost(postContent);
+      onCreatePost(postContent, 'image');
       setPostContent('');
     }
   };
+
+  const handleAddVideo = () => {
+    if (postContent.trim()) {
+      onCreatePost(postContent, 'video');
+      setPostContent('');
+    }
+  }
   
   const postLimit = 10;
-  const postsLeft = postLimit - postCountToday;
 
   return (
     <Card>
@@ -59,11 +65,11 @@ export function CreatePost({ onCreatePost, currentUser, postCountToday }: Create
             <Button variant="ghost" className="flex-1 gap-2">
                 <Video className="h-6 w-6 text-red-500" /> Live
             </Button>
-            <Button variant="ghost" className="flex-1 gap-2">
+            <Button variant="ghost" className="flex-1 gap-2" onClick={() => onCreatePost(postContent, 'image')}>
                 <ImageIcon className="h-6 w-6 text-green-500" /> Photo
             </Button>
-             <Button variant="ghost" className="flex-1 gap-2">
-                <ImageIcon className="h-6 w-6 text-blue-500" /> Video
+             <Button variant="ghost" className="flex-1 gap-2" onClick={handleAddVideo}>
+                <Video className="h-6 w-6 text-blue-500" /> Video
             </Button>
           </div>
           <Button onClick={handlePost} disabled={!postContent.trim() || postCountToday >= postLimit}>

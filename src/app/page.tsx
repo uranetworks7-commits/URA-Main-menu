@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { ref, onValue, set, push, remove, update } from "firebase/database";
 import { LeftSidebar } from '@/components/left-sidebar';
@@ -120,7 +120,7 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [isClient, posts]);
 
-  const handleCreatePost = (content: string) => {
+  const handleCreatePost = (content: string, mediaType?: 'image' | 'video', mediaUrl?: string) => {
     if (!currentUser) return;
     
     const postCount = getTodayPostCount();
@@ -136,7 +136,8 @@ export default function HomePage() {
     const newPostData: Omit<Post, 'id'> = {
       user: currentUser,
       content,
-      image: `https://picsum.photos/seed/${Date.now()}/800/600`,
+      image: mediaType === 'image' ? (mediaUrl || `https://picsum.photos/seed/${Date.now()}/800/600`) : undefined,
+      video: mediaType === 'video' ? (mediaUrl || 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4') : undefined,
       likes: {},
       comments: [],
       views: 0,
@@ -230,6 +231,12 @@ export default function HomePage() {
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
   };
+  
+  const userPosts = useMemo(() => {
+    if (!currentUser) return [];
+    return posts.filter(post => post.user.id === currentUser.id);
+  }, [posts, currentUser]);
+
 
   if (!isClient) {
     return null; // or a loading spinner
@@ -253,6 +260,7 @@ export default function HomePage() {
             currentUser={currentUser} 
             onLogout={handleLogout}
             onUpdateProfile={handleUpdateProfile}
+            userPosts={userPosts}
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <CreatePost 

@@ -39,6 +39,7 @@ export interface Post {
   user: User;
   content: string;
   image?: string;
+  video?: string;
   imageHint?: string;
   likes: { [key: string]: boolean };
   comments: Comment[];
@@ -216,6 +217,15 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           />
         </div>
       )}
+       {post.video && (
+          <div className="w-full bg-black">
+              <video
+                  src={post.video}
+                  controls
+                  className="w-full aspect-video"
+              />
+          </div>
+        )}
       <div className="flex justify-between items-center text-xs text-muted-foreground p-2 px-4">
         <div className="flex items-center gap-1">
           <ThumbsUp className="h-3 w-3 text-primary" />
