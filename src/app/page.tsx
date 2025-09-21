@@ -149,13 +149,18 @@ export default function HomePage() {
     const newPostData: Omit<Post, 'id'> = {
       user: currentUser,
       content,
-      image: mediaType === 'image' ? (mediaUrl || `https://picsum.photos/seed/${Date.now()}/800/600`) : undefined,
-      video: mediaType === 'video' ? (mediaUrl || 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4') : undefined,
       likes: {},
       comments: {},
       views: 0,
       createdAt: Date.now(),
     };
+
+    if (mediaType === 'image') {
+      newPostData.image = mediaUrl || `https://picsum.photos/seed/${Date.now()}/800/600`;
+    } else if (mediaType === 'video') {
+      newPostData.video = mediaUrl || 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    }
+    
     const newPostRef = push(ref(db, 'posts'));
     set(newPostRef, newPostData);
     incrementTodayPostCount();
