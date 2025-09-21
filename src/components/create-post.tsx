@@ -1,17 +1,20 @@
 'use client';
 import { useState } from 'react';
-import { UserCircle, Video, Image as ImageIcon } from 'lucide-react';
+import { Video, Image as ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Separator } from './ui/separator';
 import { Textarea } from './ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
+import type { User } from './post-card';
+
 
 interface CreatePostProps {
   onCreatePost: (content: string) => void;
+  currentUser: User;
 }
 
-export function CreatePost({ onCreatePost }: CreatePostProps) {
+export function CreatePost({ onCreatePost, currentUser }: CreatePostProps) {
   const [postContent, setPostContent] = useState('');
 
   const handlePost = () => {
@@ -26,8 +29,8 @@ export function CreatePost({ onCreatePost }: CreatePostProps) {
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <Avatar>
-            <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704c" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarImage src={currentUser.avatar} />
+            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="w-full">
             <Textarea

@@ -5,13 +5,7 @@ import { RightSidebar } from '@/components/right-sidebar';
 import { PostCard, Post, User } from '@/components/post-card';
 import { CreatePost } from '@/components/create-post';
 import { Header } from '@/components/header';
-
-// Simulate the currently logged-in user
-const currentUser: User = {
-  id: 'user-current',
-  name: 'Your Name',
-  avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c',
-};
+import { LoginPage } from '@/components/login-page';
 
 const initialPosts: Post[] = [
     {
@@ -47,7 +41,7 @@ const initialPosts: Post[] = [
   },
   {
     id: '3',
-    user: { id: 'user-current', name: 'Your Name', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c' },
+    user: { id: 'user-publisher', name: 'Original Publisher', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c' },
     content: 'Having fun building this new social app. What feature should I add next? Here is a post where I should be able to see revenue.',
     image: 'https://picsum.photos/seed/sub/800/600',
     imageHint: 'developer coding',
@@ -101,10 +95,12 @@ const initialPosts: Post[] = [
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const handleCreatePost = (content: string) => {
+    if (!currentUser) return;
     const newPost: Post = {
-      id: (posts.length + 1).toString(),
+      id: `post-${Date.now()}`,
       user: currentUser,
       content,
       stats: {
@@ -117,13 +113,26 @@ export default function HomePage() {
     setPosts([newPost, ...posts]);
   };
 
+  const handleLogin = (name: string) => {
+    const newUser: User = {
+      id: `user-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`,
+      name: name,
+      avatar: `https://i.pravatar.cc/150?u=${name}`
+    };
+    setCurrentUser(newUser);
+  };
+
+  if (!currentUser) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
+        <LeftSidebar currentUser={currentUser} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-            <CreatePost onCreatePost={handleCreatePost} />
+            <CreatePost onCreatePost={handleCreatePost} currentUser={currentUser} />
             <div className="space-y-4 mt-4">
               {posts.map((post) => (
                 <PostCard key={post.id} post={post} currentUser={currentUser} />
