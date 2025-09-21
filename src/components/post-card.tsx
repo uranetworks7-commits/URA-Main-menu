@@ -162,7 +162,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           <div className="flex-1">
             <div className="flex items-center gap-1">
               <p className="font-bold text-foreground">{post.user.name}</p>
-              {isPostMonetized && <BadgeCheck className="h-5 w-5 text-blue-500" />}
+              {post.user.isMonetized && <BadgeCheck className="h-5 w-5 text-blue-500" />}
             </div>
             <p className="text-xs text-muted-foreground">Published · {timeAgo}</p>
           </div>
