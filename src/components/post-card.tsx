@@ -123,10 +123,10 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPublisher = post.user.id === currentUser.id;
   const viewsCount = parseCount(post.views);
   
-  const isMonetized = useMemo(() => viewsCount > 1000 && likesCount > 50, [viewsCount, likesCount]);
+  const isPostMonetized = useMemo(() => viewsCount > 1000 && likesCount >= 25, [viewsCount, likesCount]);
 
   let revenue = 0;
-  if (isMonetized) {
+  if (isPostMonetized) {
       revenue = (viewsCount / 1000) * 25;
   }
   
@@ -160,7 +160,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           <div className="flex-1">
             <div className="flex items-center gap-1">
               <p className="font-bold text-foreground">{post.user.name}</p>
-              {isMonetized && <BadgeCheck className="h-5 w-5 text-blue-500" />}
+              {isPostMonetized && <BadgeCheck className="h-5 w-5 text-blue-500" />}
             </div>
             <p className="text-xs text-muted-foreground">Published · {timeAgo}</p>
           </div>
@@ -182,7 +182,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                    <span>Published</span>
                  </DropdownMenuItem>
-                 {isMonetized && (
+                 {isPostMonetized && (
                     <DropdownMenuItem className="text-blue-500">
                       <BadgeCheck className="mr-2 h-4 w-4" />
                       <span>Monetized</span>

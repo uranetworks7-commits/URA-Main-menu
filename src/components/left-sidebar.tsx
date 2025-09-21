@@ -16,7 +16,7 @@ import {
   BadgeCheck,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
@@ -51,27 +51,29 @@ const settingLinks = [
 
 export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts }: LeftSidebarProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMonetized, setIsMonetized] = useState(false);
 
-  const { totalRevenue, isMonetized } = useMemo(() => {
-    const revenue = userPosts.reduce((total, post) => {
+  useEffect(() => {
+    if (currentUser) {
+      const monetizationStatus = localStorage.getItem(`monetized_${currentUser.id}`);
+      setIsMonetized(monetizationStatus === 'true');
+    }
+  }, [currentUser]);
+
+
+  const totalRevenue = useMemo(() => {
+    if (!isMonetized) return 0;
+    return userPosts.reduce((total, post) => {
         const views = post.views || 0;
         const likes = Object.keys(post.likes || {}).length;
-        const isPostMonetized = views > 1000 && likes > 50;
+        const isPostMonetized = views > 1000 && likes >= 25;
         if (isPostMonetized) {
           const postRevenue = (views / 1000) * 25;
           return total + postRevenue;
         }
         return total;
     }, 0);
-
-    const hasMonetizedPost = userPosts.some(post => {
-        const views = post.views || 0;
-        const likes = Object.keys(post.likes || {}).length;
-        return views > 1000 && likes > 50;
-    });
-
-    return { totalRevenue: revenue, isMonetized: hasMonetizedPost };
-  }, [userPosts]);
+  }, [userPosts, isMonetized]);
 
   if (!currentUser) return null;
 

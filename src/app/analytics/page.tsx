@@ -13,18 +13,24 @@ import { format } from 'date-fns';
 import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useToast } from "@/hooks/use-toast";
 
 export default function AnalyticsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [isMonetized, setIsMonetized] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
+      const user = JSON.parse(savedUser);
+      setCurrentUser(user);
+      const monetizationStatus = localStorage.getItem(`monetized_${user.id}`);
+      setIsMonetized(monetizationStatus === 'true');
     } else {
         // If no user, redirect to home to login
         router.push('/');
@@ -53,6 +59,28 @@ export default function AnalyticsPage() {
     return posts.filter(post => post.user.id === currentUser.id);
   }, [posts, currentUser]);
 
+  const canBeMonetized = useMemo(() => {
+      return userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 25);
+  }, [userPosts]);
+
+  const handleRequestMonetization = () => {
+    if (!currentUser) return;
+    if (canBeMonetized) {
+      localStorage.setItem(`monetized_${currentUser.id}`, 'true');
+      setIsMonetized(true);
+      toast({
+        title: "Congratulations!",
+        description: "Your account is now monetized.",
+      });
+    } else {
+      toast({
+        title: "Monetization Requirements Not Met",
+        description: "You need at least one post with over 1,000 views and 25 likes.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   if (!isClient || !currentUser) {
     return null; // or a loading spinner
@@ -61,8 +89,8 @@ export default function AnalyticsPage() {
   const totalRevenue = userPosts.reduce((total, post) => {
     const views = post.views || 0;
     const likes = Object.keys(post.likes || {}).length;
-    const isMonetized = views > 1000 && likes > 50;
-    if (isMonetized) {
+    const isPostMonetized = views > 1000 && likes >= 25;
+    if (isPostMonetized) {
       const postRevenue = (views / 1000) * 25;
       return total + postRevenue;
     }
@@ -99,13 +127,25 @@ export default function AnalyticsPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <Card>
                 <CardHeader>
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                            <ArrowLeft className="h-6 w-6" />
-                        </Button>
+                    <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                                <ArrowLeft className="h-6 w-6" />
+                            </Button>
+                            <div>
+                                <CardTitle>Your Analytics</CardTitle>
+                                <CardDescription>An overview of your content performance.</CardDescription>
+                            </div>
+                        </div>
                         <div>
-                            <CardTitle>Your Analytics</CardTitle>
-                            <CardDescription>An overview of your content performance.</CardDescription>
+                        {isMonetized ? (
+                            <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
+                                <BadgeCheck className="mr-1 h-3 w-3"/>
+                                Monetized
+                            </Badge>
+                        ) : (
+                           <Button onClick={handleRequestMonetization}>Request Monetization</Button>
+                        )}
                         </div>
                     </div>
                 </CardHeader>
@@ -117,8 +157,8 @@ export default function AnalyticsPage() {
                                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">₹{totalRevenue.toFixed(2)}</div>
-                                <p className="text-xs text-muted-foreground">from {userPosts.filter(p => (p.views || 0) > 1000 && Object.keys(p.likes || {}).length > 50).length} monetized posts</p>
+                                <div className="text-2xl font-bold">₹{isMonetized ? totalRevenue.toFixed(2) : '0.00'}</div>
+                                <p className="text-xs text-muted-foreground">{isMonetized ? `from ${userPosts.filter(p => (p.views || 0) > 1000 && Object.keys(p.likes || {}).length >= 25).length} monetized posts` : "Account not monetized"}</p>
                             </CardContent>
                         </Card>
                         <Card>
@@ -159,15 +199,15 @@ export default function AnalyticsPage() {
                             {userPosts.map(post => {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
-                                const isMonetized = views > 1000 && likes > 50;
-                                const revenue = isMonetized ? (views / 1000) * 25 : 0;
+                                const isPostMonetized = views > 1000 && likes >= 25;
+                                const revenue = isMonetized && isPostMonetized ? (views / 1000) * 25 : 0;
                                 
                                 return (
                                     <TableRow key={post.id}>
                                         <TableCell className="max-w-xs truncate font-medium">{post.content}</TableCell>
                                         <TableCell>{format(new Date(post.createdAt), 'dd MMM yyyy')}</TableCell>
                                         <TableCell className="text-center">
-                                            {isMonetized ? (
+                                            {isPostMonetized ? (
                                                 <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
                                                     <BadgeCheck className="mr-1 h-3 w-3"/>
                                                     Monetized
