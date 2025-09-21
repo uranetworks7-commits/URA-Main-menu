@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Home, Users, Clapperboard, Store, Bell, MessageCircle, Menu, LogOut, Settings } from 'lucide-react';
+import { Search, Home, Users, Clapperboard, Store, Bell, MessageCircle, Menu, LogOut, Settings, BarChart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
@@ -11,6 +11,7 @@ import { ProfileSettingsDialog } from './profile-settings-dialog';
 import type { User, Post } from './post-card';
 import { useState } from 'react';
 import { UraIcon } from './ura-icon';
+import Link from 'next/link';
 
 interface HeaderProps {
   currentUser: User | null;
@@ -71,6 +72,11 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts, sear
         </Button>
       </nav>
       <div className="flex items-center gap-2">
+        <Link href="/analytics">
+          <Button variant="ghost" size="icon" className="rounded-full bg-secondary hover:bg-muted">
+            <BarChart className="h-5 w-5" />
+          </Button>
+        </Link>
         <Button variant="ghost" size="icon" className="rounded-full bg-secondary hover:bg-muted">
           <Bell className="h-5 w-5" />
         </Button>

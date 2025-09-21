@@ -35,7 +35,6 @@ interface LeftSidebarProps {
 const mainLinks = [
   { icon: Users, label: 'Friends' },
   { icon: Rss, label: 'Feeds' },
-  { icon: BarChart, label: 'Analytics', href: '/analytics' },
   { icon: Store, label: 'Marketplace' },
   { icon: Clapperboard, label: 'Watch' },
   { icon: Calendar, label: 'Events' },
