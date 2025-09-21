@@ -289,6 +289,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
               <video
                   src={post.video}
                   controls
+                  muted
                   className="w-full aspect-video"
               />
           </div>
