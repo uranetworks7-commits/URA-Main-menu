@@ -91,11 +91,9 @@ export default function AnalyticsPage() {
 
   const totalRevenue = userPosts.reduce((total, post) => {
     const views = post.views || 0;
-    const likes = Object.keys(post.likes || {}).length;
-    const isPostMonetized = views > 1000 && likes >= 5;
-    if (isPostMonetized) {
-      const postRevenue = (views / 1250) * 25;
-      return total + postRevenue;
+    if (currentUser.isMonetized) {
+        const postRevenue = (views / 1250) * 25;
+        return total + postRevenue;
     }
     return total;
   }, 0);
@@ -159,7 +157,7 @@ export default function AnalyticsPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">₹{currentUser.isMonetized ? totalRevenue.toFixed(2) : '0.00'}</div>
-                                <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `from ${userPosts.filter(p => (p.views || 0) > 1000 && Object.keys(p.likes || {}).length >= 5).length} monetized posts` : "Account not monetized"}</p>
+                                <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `from ${userPosts.length} posts` : "Account not monetized"}</p>
                             </CardContent>
                         </Card>
                         <Card>
@@ -200,21 +198,20 @@ export default function AnalyticsPage() {
                             {userPosts.map(post => {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
-                                const isPostMonetized = views > 1000 && likes >= 5;
-                                const revenue = currentUser.isMonetized && isPostMonetized ? (views / 1250) * 25 : 0;
+                                const isPostEligible = views > 1000 && likes >= 5;
+                                const revenue = currentUser.isMonetized ? (views / 1250) * 25 : 0;
                                 
                                 return (
                                     <TableRow key={post.id}>
                                         <TableCell className="max-w-xs truncate font-medium">{post.content}</TableCell>
                                         <TableCell>{format(new Date(post.createdAt), 'dd MMM yyyy')}</TableCell>
                                         <TableCell className="text-center">
-                                            {isPostMonetized ? (
-                                                <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
-                                                    <BadgeCheck className="mr-1 h-3 w-3"/>
-                                                    Monetized
+                                            {isPostEligible ? (
+                                                <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                                                    Eligible
                                                 </Badge>
                                             ) : (
-                                                 <Badge variant="secondary">Unmonetized</Badge>
+                                                 <Badge variant="secondary">Not Eligible</Badge>
                                             )}
                                         </TableCell>
                                         <TableCell className="text-right">{views.toLocaleString()}</TableCell>

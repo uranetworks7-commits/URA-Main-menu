@@ -56,13 +56,8 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
     if (!currentUser?.isMonetized || !userPosts) return 0;
     return userPosts.reduce((total, post) => {
         const views = post.views || 0;
-        const likes = Object.keys(post.likes || {}).length;
-        const isPostMonetized = views > 1000 && likes >= 5;
-        if (isPostMonetized) {
-          const postRevenue = (views / 1250) * 25;
-          return total + postRevenue;
-        }
-        return total;
+        const postRevenue = (views / 1250) * 25;
+        return total + postRevenue;
     }, 0);
   }, [userPosts, currentUser?.isMonetized]);
 

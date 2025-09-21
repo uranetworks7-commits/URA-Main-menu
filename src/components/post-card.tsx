@@ -126,10 +126,10 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPublisher = post.user.id === currentUser.id;
   const viewsCount = parseCount(post.views);
   
-  const isPostMonetized = useMemo(() => viewsCount > 1000 && likesCount >= 5, [viewsCount, likesCount]);
+  const isPostEligible = useMemo(() => viewsCount > 1000 && likesCount >= 5, [viewsCount, likesCount]);
 
   let revenue = 0;
-  if (isPostMonetized) {
+  if (post.user.isMonetized) {
       revenue = (viewsCount / 1250) * 25;
   }
   
@@ -184,10 +184,10 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                    <span>Published</span>
                  </DropdownMenuItem>
-                 {isPostMonetized && (
+                 {isPostEligible && (
                     <DropdownMenuItem className="text-blue-500">
                       <BadgeCheck className="mr-2 h-4 w-4" />
-                      <span>Monetized</span>
+                      <span>Eligible for Monetization</span>
                     </DropdownMenuItem>
                  )}
                 <DropdownMenuSeparator />
