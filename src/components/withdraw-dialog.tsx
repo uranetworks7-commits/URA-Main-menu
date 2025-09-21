@@ -51,12 +51,13 @@ export function WithdrawDialog({
   });
 
   const amount = form.watch('amount');
-  const fee = useMemo(() => amount * 0.33, [amount]);
-  const totalDeducted = useMemo(() => amount + fee, [amount, fee]);
+  const fee = useMemo(() => (amount || 0) * 0.33, [amount]);
+  const totalDeducted = useMemo(() => (amount || 0) + fee, [amount, fee]);
 
   useEffect(() => {
     if (!isOpen) {
       form.reset({ amount: '' as any, redeemCode: '' });
+      setIsSubmitting(false);
     }
   }, [isOpen, form]);
 
@@ -85,9 +86,13 @@ export function WithdrawDialog({
             timestamp: Date.now()
         };
         
-        const userWithdrawalsRef = ref(db, `users/${currentUser.id}/withdrawals`);
-        const newWithdrawalRef = push(userWithdrawalsRef);
-        await update(newWithdrawalRef, withdrawalData);
+        // This creates a unique key for the new withdrawal
+        const newWithdrawalKey = push(ref(db, `users/${currentUser.id}/withdrawals`)).key;
+        
+        const updates: { [key: string]: any } = {};
+        updates[`/users/${currentUser.id}/withdrawals/${newWithdrawalKey}`] = withdrawalData;
+
+        await update(ref(db), updates);
 
         toast({
             title: "Withdrawal Successful",
@@ -96,6 +101,7 @@ export function WithdrawDialog({
         onOpenChange(false);
 
     } catch (error) {
+        console.error("Withdrawal failed:", error);
         toast({
             title: "Withdrawal Failed",
             description: "Something went wrong. Please try again.",
@@ -129,7 +135,8 @@ export function WithdrawDialog({
                                  type="number"
                                  placeholder="e.g. 50" 
                                  {...field} 
-                                 onChange={e => field.onChange(e.target.valueAsNumber)} 
+                                 onChange={e => field.onChange(e.target.value === '' ? '' : e.target.valueAsNumber)}
+                                 value={field.value}
                                />
                             </FormControl>
                             <FormMessage />

@@ -14,6 +14,7 @@ import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper } from 'l
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
+import { WithdrawDialog } from '@/components/withdraw-dialog';
 
 export default function AnalyticsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -21,6 +22,7 @@ export default function AnalyticsPage() {
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -83,26 +85,34 @@ export default function AnalyticsPage() {
       });
     }
   };
+  
+  const totalRevenue = useMemo(() => {
+      if (!currentUser?.isMonetized) return 0;
+      return userPosts.reduce((total, post) => {
+        const views = post.views || 0;
+        const postRevenue = (views / 1250) * 25;
+        return total + postRevenue;
+    }, 0);
+  }, [userPosts, currentUser?.isMonetized]);
 
+  const totalWithdrawals = useMemo(() => {
+    if (!currentUser?.withdrawals) return 0;
+    return Object.values(currentUser.withdrawals).reduce((acc, w) => acc + w.totalDeducted, 0);
+  }, [currentUser?.withdrawals]);
+  
+  const availableBalance = useMemo(() => totalRevenue - totalWithdrawals, [totalRevenue, totalWithdrawals]);
+
+
+  const totalViews = currentUser?.totalViews || 0;
+  const totalLikes = currentUser?.totalLikes || 0;
 
   if (!isClient || !currentUser) {
     return null; // or a loading spinner
   }
 
-  const totalRevenue = userPosts.reduce((total, post) => {
-    const views = post.views || 0;
-    if (currentUser.isMonetized) {
-        const postRevenue = (views / 1250) * 25;
-        return total + postRevenue;
-    }
-    return total;
-  }, 0);
-
-  const totalViews = currentUser.totalViews || 0;
-  const totalLikes = currentUser.totalLikes || 0;
-
 
   return (
+    <>
     <div className="flex flex-col h-screen">
       <Header 
         currentUser={currentUser}
@@ -136,12 +146,15 @@ export default function AnalyticsPage() {
                                 <CardDescription>An overview of your content performance.</CardDescription>
                             </div>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-2">
                         {currentUser.isMonetized ? (
-                            <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2">
-                                <BadgeCheck className="mr-2 h-4 w-4"/>
-                                Monetized Account
-                            </Badge>
+                            <>
+                                <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3">
+                                    <BadgeCheck className="mr-2 h-4 w-4"/>
+                                    Monetized Account
+                                </Badge>
+                                <Button onClick={() => setIsWithdrawDialogOpen(true)}>Withdraw</Button>
+                            </>
                         ) : (
                            <Button onClick={handleRequestMonetization}>Request Monetization</Button>
                         )}
@@ -152,12 +165,12 @@ export default function AnalyticsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                                <CardTitle className="text-sm font-medium">Available for Withdrawal</CardTitle>
                                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">₹{currentUser.isMonetized ? totalRevenue.toFixed(2) : '0.00'}</div>
-                                <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `from ${userPosts.length} posts` : "Account not monetized"}</p>
+                                <div className="text-2xl font-bold">₹{currentUser.isMonetized ? availableBalance.toFixed(2) : '0.00'}</div>
+                                <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `Total revenue: ₹${totalRevenue.toFixed(2)}` : "Account not monetized"}</p>
                             </CardContent>
                         </Card>
                         <Card>
@@ -240,5 +253,14 @@ export default function AnalyticsPage() {
         <RightSidebar />
       </div>
     </div>
+     {currentUser.isMonetized && (
+        <WithdrawDialog
+          isOpen={isWithdrawDialogOpen}
+          onOpenChange={setIsWithdrawDialogOpen}
+          currentUser={currentUser}
+          availableBalance={availableBalance}
+        />
+      )}
+    </>
   );
 }

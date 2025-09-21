@@ -22,7 +22,13 @@ import { ReportDialog } from './report-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
-
+export interface Withdrawal {
+  amount: number;
+  fee: number;
+  totalDeducted: number;
+  redeemCode: string;
+  timestamp: number;
+}
 export interface User {
   id: string;
   name: string;
@@ -30,6 +36,7 @@ export interface User {
   isMonetized?: boolean;
   totalViews?: number;
   totalLikes?: number;
+  withdrawals?: { [key: string]: Withdrawal };
 }
 export interface Comment {
     id: string;
