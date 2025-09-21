@@ -61,7 +61,7 @@ export default function AnalyticsPage() {
   }, [posts, currentUser]);
 
   const canBeMonetized = useMemo(() => {
-      return userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 25);
+      return userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 5);
   }, [userPosts]);
 
   const handleRequestMonetization = () => {
@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
     } else {
       toast({
         title: "Monetization Requirements Not Met",
-        description: "You need at least one post with over 1,000 views and 25 likes.",
+        description: "You need at least one post with over 1,000 views and 5 likes.",
         variant: "destructive",
       });
     }
@@ -91,7 +91,7 @@ export default function AnalyticsPage() {
   const totalRevenue = userPosts.reduce((total, post) => {
     const views = post.views || 0;
     const likes = Object.keys(post.likes || {}).length;
-    const isPostMonetized = views > 1000 && likes >= 25;
+    const isPostMonetized = views > 1000 && likes >= 5;
     if (isPostMonetized) {
       const postRevenue = (views / 1250) * 25;
       return total + postRevenue;
@@ -158,7 +158,7 @@ export default function AnalyticsPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">₹{currentUser.isMonetized ? totalRevenue.toFixed(2) : '0.00'}</div>
-                                <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `from ${userPosts.filter(p => (p.views || 0) > 1000 && Object.keys(p.likes || {}).length >= 25).length} monetized posts` : "Account not monetized"}</p>
+                                <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `from ${userPosts.filter(p => (p.views || 0) > 1000 && Object.keys(p.likes || {}).length >= 5).length} monetized posts` : "Account not monetized"}</p>
                             </CardContent>
                         </Card>
                         <Card>
@@ -199,7 +199,7 @@ export default function AnalyticsPage() {
                             {userPosts.map(post => {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
-                                const isPostMonetized = views > 1000 && likes >= 25;
+                                const isPostMonetized = views > 1000 && likes >= 5;
                                 const revenue = currentUser.isMonetized && isPostMonetized ? (views / 1250) * 25 : 0;
                                 
                                 return (

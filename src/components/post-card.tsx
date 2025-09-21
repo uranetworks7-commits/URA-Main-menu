@@ -126,7 +126,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPublisher = post.user.id === currentUser.id;
   const viewsCount = parseCount(post.views);
   
-  const isPostMonetized = useMemo(() => viewsCount > 1000 && likesCount >= 25, [viewsCount, likesCount]);
+  const isPostMonetized = useMemo(() => viewsCount > 1000 && likesCount >= 5, [viewsCount, likesCount]);
 
   let revenue = 0;
   if (isPostMonetized) {

@@ -57,7 +57,7 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
     return userPosts.reduce((total, post) => {
         const views = post.views || 0;
         const likes = Object.keys(post.likes || {}).length;
-        const isPostMonetized = views > 1000 && likes >= 25;
+        const isPostMonetized = views > 1000 && likes >= 5;
         if (isPostMonetized) {
           const postRevenue = (views / 1250) * 25;
           return total + postRevenue;
