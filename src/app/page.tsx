@@ -125,10 +125,10 @@ export default function HomePage() {
     if (!currentUser) return;
     
     const postCount = getTodayPostCount();
-    if (postCount >= 10) {
+    if (postCount >= 1) {
       toast({
         title: "Post Limit Reached",
-        description: "You can only create up to 10 posts per day.",
+        description: "You can only create up to 1 post per day.",
         variant: "destructive",
       });
       return;

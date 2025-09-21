@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, BarChart } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -20,6 +20,7 @@ import { Input } from './ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { ReportDialog } from './report-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 
 export interface User {
@@ -76,6 +77,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const [commentText, setCommentText] = useState('');
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   
   const likesCount = useMemo(() => Object.keys(post.likes || {}).length, [post.likes]);
@@ -203,6 +205,12 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                    </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
+                {isPublisher && (
+                   <DropdownMenuItem onClick={() => router.push('/analytics')}>
+                    <BarChart className="mr-2 h-4 w-4" />
+                    <span>View Analytics</span>
+                  </DropdownMenuItem>
+                )}
                 {isPublisher && (
                     <DropdownMenuItem onClick={() => onDeletePost(post.id)} className="text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />

@@ -34,7 +34,7 @@ export function CreatePost({ onCreatePost, currentUser, postCountToday }: Create
     }
   }
   
-  const postLimit = 10;
+  const postLimit = 1;
 
   return (
     <Card>
