@@ -2,19 +2,21 @@
 import { useState } from 'react';
 import { LeftSidebar } from '@/components/left-sidebar';
 import { RightSidebar } from '@/components/right-sidebar';
-import { PostCard, Post } from '@/components/post-card';
+import { PostCard, Post, User } from '@/components/post-card';
 import { CreatePost } from '@/components/create-post';
 import { Header } from '@/components/header';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Initialize Firebase (placeholder)
-// To enable Firebase, you would create a firebase.ts file and import it here
-// import { app } from '@/lib/firebase';
+// Simulate the currently logged-in user
+const currentUser: User = {
+  id: 'user-current',
+  name: 'Your Name',
+  avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c',
+};
 
 const initialPosts: Post[] = [
     {
     id: '1',
-    user: { name: 'URA Studio', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+    user: { id: 'user-1', name: 'URA Studio', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
     content: 'Welcome to the new URA Social platform! This is the beginning of something amazing. We are building a community-focused social network.',
     image: 'https://picsum.photos/seed/1/800/600',
     imageHint: 'abstract tech',
@@ -22,12 +24,15 @@ const initialPosts: Post[] = [
       likes: '1.2k',
       comments: '48',
       views: '15.7k',
-      revenue: '$25.50'
-    }
+    },
+    comments: [
+        { id: 'c1', user: { name: 'Dev Team' }, text: 'Excited to be part of this journey!' },
+        { id: 'c2', user: { name: 'Community Manager' }, text: 'The community is going to love this.' },
+    ]
   },
   {
     id: '2',
-    user: { name: 'Dev Team', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704e' },
+    user: { id: 'user-2', name: 'Dev Team', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704e' },
     content: 'Just pushed a major update! The feed now looks cleaner and loads faster. Let us know what you think of the new design. #webdev #react #nextjs',
     image: 'https://picsum.photos/seed/2/800/500',
     imageHint: 'coding computer',
@@ -35,12 +40,27 @@ const initialPosts: Post[] = [
       likes: '876',
       comments: '112',
       views: '12.1k',
-      revenue: '$18.20'
-    }
+    },
+     comments: [
+        { id: 'c3', user: { name: 'AI Enthusiast' }, text: 'Love the new look!' },
+    ]
   },
   {
     id: '3',
-    user: { name: 'Community Manager', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704f' },
+    user: { id: 'user-current', name: 'Your Name', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c' },
+    content: 'Having fun building this new social app. What feature should I add next? Here is a post where I should be able to see revenue.',
+    image: 'https://picsum.photos/seed/sub/800/600',
+    imageHint: 'developer coding',
+    stats: {
+      likes: '42',
+      comments: '8',
+      views: '1.5k', // This should generate 25Rs revenue
+    },
+    comments: []
+  },
+  {
+    id: '4',
+    user: { id: 'user-3', name: 'Community Manager', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704f' },
     content: 'Planning our next community event. What topics are you most interested in? Drop your suggestions below! We want to hear from you.',
     image: 'https://picsum.photos/seed/3/800/700',
     imageHint: 'community event',
@@ -48,12 +68,12 @@ const initialPosts: Post[] = [
       likes: '452',
       comments: '230',
       views: '9.8k',
-      revenue: '$12.75'
-    }
+    },
+    comments: []
   },
   {
-    id: '4',
-    user: { name: 'AI Enthusiast', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704a' },
+    id: '5',
+    user: { id: 'user-4', name: 'AI Enthusiast', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704a' },
     content: 'Exploring the latest in generative AI. The possibilities are endless! #AI #MachineLearning',
     image: 'https://picsum.photos/seed/4/800/550',
     imageHint: 'artificial intelligence',
@@ -61,12 +81,12 @@ const initialPosts: Post[] = [
       likes: '2.5k',
       comments: '150',
       views: '22.3k',
-      revenue: '$45.10'
-    }
+    },
+    comments: []
   },
   {
-    id: '5',
-    user: { name: 'UX Designer', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704b' },
+    id: '6',
+    user: { id: 'user-5', name: 'UX Designer', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704b' },
     content: 'A good user experience is not just about aesthetics, it\'s about creating a seamless and intuitive journey for the user. #UX #DesignThinking',
     image: 'https://picsum.photos/seed/5/800/650',
     imageHint: 'design sketch',
@@ -74,8 +94,8 @@ const initialPosts: Post[] = [
       likes: '990',
       comments: '80',
       views: '11.5k',
-      revenue: '$15.00'
-    }
+    },
+    comments: []
   }
 ];
 
@@ -85,14 +105,14 @@ export default function HomePage() {
   const handleCreatePost = (content: string) => {
     const newPost: Post = {
       id: (posts.length + 1).toString(),
-      user: { name: 'Your Name', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c' }, // Placeholder for logged in user
+      user: currentUser,
       content,
       stats: {
         likes: '0',
         comments: '0',
         views: '0',
-        revenue: '$0.00'
-      }
+      },
+      comments: []
     };
     setPosts([newPost, ...posts]);
   };
@@ -106,7 +126,7 @@ export default function HomePage() {
             <CreatePost onCreatePost={handleCreatePost} />
             <div className="space-y-4 mt-4">
               {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard key={post.id} post={post} currentUser={currentUser} />
               ))}
             </div>
         </main>
