@@ -113,11 +113,11 @@ export default function HomePage() {
     setPosts([newPost, ...posts]);
   };
 
-  const handleLogin = (name: string) => {
+  const handleLogin = (name: string, avatarUrl?: string) => {
     const newUser: User = {
       id: `user-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`,
       name: name,
-      avatar: `https://i.pravatar.cc/150?u=${name}`
+      avatar: avatarUrl || `https://i.pravatar.cc/150?u=${name}`
     };
     setCurrentUser(newUser);
   };

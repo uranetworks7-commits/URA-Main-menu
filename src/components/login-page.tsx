@@ -10,13 +10,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 interface LoginPageProps {
-  onLogin: (name: string) => void;
+  onLogin: (name: string, avatarUrl?: string) => void;
 }
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
+  avatarUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 
@@ -25,11 +26,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      avatarUrl: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onLogin(values.name);
+    onLogin(values.name, values.avatarUrl);
   }
 
   return (
@@ -57,6 +59,19 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     <FormLabel>Your Name</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="avatarUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Profile Picture URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/image.png" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
