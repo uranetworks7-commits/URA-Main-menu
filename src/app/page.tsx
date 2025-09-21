@@ -17,7 +17,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     image: 'https://picsum.photos/seed/1/800/600',
     imageHint: 'abstract tech',
     likes: {},
-    comments: [],
+    comments: {},
     views: 1200,
   },
   {
@@ -26,7 +26,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     image: 'https://picsum.photos/seed/2/800/500',
     imageHint: 'coding computer',
     likes: {},
-    comments: [],
+    comments: {},
     views: 876,
   },
   {
@@ -35,7 +35,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     image: 'https://picsum.photos/seed/sub/800/600',
     imageHint: 'developer coding',
     likes: { 'user-2': true, 'user-1': true },
-    comments: [],
+    comments: {},
     views: 1500,
   },
 ];
@@ -140,7 +140,7 @@ export default function HomePage() {
       image: mediaType === 'image' ? (mediaUrl || `https://picsum.photos/seed/${Date.now()}/800/600`) : undefined,
       video: mediaType === 'video' ? (mediaUrl || 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4') : undefined,
       likes: {},
-      comments: [],
+      comments: {},
       views: 0,
       createdAt: Date.now(),
     };
@@ -216,7 +216,7 @@ export default function HomePage() {
     const newUser: User = {
       id: userId,
       name: name,
-      avatar: avatarUrl || `https://i.pravatar.cc/150?u=${userId}`,
+      avatar: avatarUrl || `https://placehold.co/150x150/222/fff?text=${name.charAt(0).toUpperCase()}`,
     };
     
     // Save user to Firebase

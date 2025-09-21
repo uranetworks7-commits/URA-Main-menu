@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { DollarSign, Eye, ThumbsUp, MessageSquare, BadgeCheck } from 'lucide-react';
+import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 export default function AnalyticsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -98,8 +99,15 @@ export default function AnalyticsPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Your Analytics</CardTitle>
-                    <CardDescription>An overview of your content performance.</CardDescription>
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                            <ArrowLeft className="h-6 w-6" />
+                        </Button>
+                        <div>
+                            <CardTitle>Your Analytics</CardTitle>
+                            <CardDescription>An overview of your content performance.</CardDescription>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

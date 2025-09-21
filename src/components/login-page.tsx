@@ -31,8 +31,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const userId = `user-${values.name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`;
-    const avatar = values.avatarUrl || `https://i.pravatar.cc/150?u=${userId}`;
+    const avatar = values.avatarUrl || `https://placehold.co/150x150/222/fff?text=${values.name.charAt(0).toUpperCase()}`;
     onLogin(values.name, avatar);
   }
 
