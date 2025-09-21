@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Home, Users, Clapperboard, Store, Bell, MessageCircle, Menu, LogOut, Settings, BarChart } from 'lucide-react';
+import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, BarChart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
@@ -66,12 +66,6 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
             <BarChart className="h-5 w-5" />
           </Button>
         </Link>
-        <Button variant="ghost" size="icon" className="rounded-full bg-secondary hover:bg-muted">
-          <Bell className="h-5 w-5" />
-        </Button>
-        <Button variant="ghost" size="icon" className="rounded-full bg-secondary hover:bg-muted">
-          <MessageCircle className="h-5 w-5" />
-        </Button>
         {currentUser && (
           <ProfileSettingsDialog 
               currentUser={currentUser}
