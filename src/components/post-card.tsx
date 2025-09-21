@@ -184,6 +184,9 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
       .sort((a, b) => a.createdAt - b.createdAt);
   }, [post.comments]);
 
+  const secondsSinceCreation = (Date.now() - (post.createdAt || Date.now())) / 1000;
+  const isPublishing = secondsSinceCreation < 15;
+  const isCountingViews = secondsSinceCreation < 60;
 
   return (
     <Card>
@@ -299,10 +302,12 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           <button onClick={handleToggleComments} className="hover:underline">
             {formatCount(sortedComments.length)} Comments
           </button>
-          <div className="flex items-center gap-1">
-            <Eye className="h-4 w-4" />
-            <span>{formatCount(viewsCount)}</span>
-          </div>
+          {!isPublishing && (
+            <div className="flex items-center gap-1">
+              <Eye className={cn("h-4 w-4", isCountingViews && "text-muted-foreground/50")} />
+              <span>{formatCount(viewsCount)}</span>
+            </div>
+          )}
           {isPublisher && post.user.isMonetized && (
              <div className="flex items-center gap-1 text-green-500">
                <DollarSign className="h-4 w-4" />
