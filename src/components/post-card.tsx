@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
 import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, BarChart } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -91,6 +91,29 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const { toast } = useToast();
   const router = useRouter();
 
+  const [timeAgo, setTimeAgo] = useState(() => {
+    if (!post.createdAt) return 'just now';
+    const secondsSinceCreation = (Date.now() - post.createdAt) / 1000;
+    if (secondsSinceCreation < 15) {
+      return 'Publishing...';
+    }
+    try {
+      return formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
+    } catch (e) {
+      return 'just now';
+    }
+  });
+
+  useEffect(() => {
+    const secondsSinceCreation = (Date.now() - post.createdAt) / 1000;
+    if (secondsSinceCreation < 15) {
+      const timer = setTimeout(() => {
+        setTimeAgo(formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }));
+      }, (15 - secondsSinceCreation) * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [post.createdAt]);
+
   
   const likesCount = useMemo(() => Object.keys(post.likes || {}).length, [post.likes]);
   const isLiked = useMemo(() => currentUser && post.likes && post.likes[currentUser.id], [currentUser, post.likes]);
@@ -155,15 +178,6 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
       revenue = (viewsCount / 1250) * 25;
   }
   
-  const timeAgo = useMemo(() => {
-    if (!post.createdAt) return 'just now';
-    try {
-      return formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
-    } catch (e) {
-      return 'just now'
-    }
-  }, [post.createdAt]);
-
   const sortedComments = useMemo(() => {
     if (!post.comments) return [];
     return Object.values(post.comments)
@@ -186,7 +200,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
               <p className="font-bold text-foreground">{post.user.name}</p>
               {post.user.isMonetized && <BadgeCheck className="h-5 w-5 text-blue-500" />}
             </div>
-            <p className="text-xs text-muted-foreground">Published · {timeAgo}</p>
+            <p className="text-xs text-muted-foreground">{timeAgo}</p>
           </div>
           <ReportDialog
             isOpen={isReportDialogOpen}
