@@ -45,6 +45,10 @@ const settingLinks = [
 export function LeftSidebar({ currentUser, onLogout, onUpdateProfile }: LeftSidebarProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // If currentUser is null, don't render anything.
+  // This can happen in the mobile sheet view if the user is not logged in.
+  if (!currentUser) return null;
+
   return (
     <aside className="hidden md:block w-80 bg-card border-r border-border">
       <ScrollArea className="h-full p-4">
@@ -81,7 +85,7 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile }: LeftSide
               isOpen={isSettingsOpen}
               onOpenChange={setIsSettingsOpen}
             >
-              <Button variant="ghost" className="w-full justify-start gap-3 px-3">
+              <Button variant="ghost" className="w-full justify-start gap-3 px-3" onClick={() => setIsSettingsOpen(true)}>
                 <Settings className="h-5 w-5 text-muted-foreground" />
                 <span className="font-semibold">Settings & Privacy</span>
               </Button>

@@ -213,7 +213,11 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header />
+      <Header 
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onUpdateProfile={handleUpdateProfile}
+      />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar 
             currentUser={currentUser} 
