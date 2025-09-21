@@ -131,7 +131,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   }
   
   const timeAgo = useMemo(() => {
-    if (!post.createdAt) return 'Just now';
+    if (!post.createdAt) return 'just now';
     try {
       return formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
     } catch (e) {
@@ -141,8 +141,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
 
   const sortedComments = useMemo(() => {
     if (!post.comments) return [];
-    return Object.entries(post.comments)
-      .map(([id, comment]) => ({ ...comment, id }))
+    return Object.values(post.comments)
       .sort((a, b) => a.createdAt - b.createdAt);
   }, [post.comments]);
 

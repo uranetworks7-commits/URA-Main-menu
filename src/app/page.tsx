@@ -90,13 +90,11 @@ export default function HomePage() {
           // Seed the database if it's empty
           initialPosts.forEach((post) => {
             const newPostRef = push(ref(db, 'posts'));
-            if (newPostRef.key) {
-              const postWithTimestamp: Omit<Post, 'id'> = {
-                ...post,
-                createdAt: Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 3), // random post from last 3 days
-              };
-              set(newPostRef, postWithTimestamp);
-            }
+            const postWithTimestamp: Omit<Post, 'id'> = {
+              ...post,
+              createdAt: Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 3), // random post from last 3 days
+            };
+            set(newPostRef, postWithTimestamp);
           });
         }
       });
