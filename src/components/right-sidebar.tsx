@@ -7,10 +7,21 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 const sponsoredItems = [{ title: 'Publish Your Ad', description: 'Get seen by thousands of users today. Click to create your ad campaign.', link: 'youradshere.com' }];
 
 const contacts = [
-  { name: 'John Doe', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704a' },
-  { name: 'Jane Smith', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704b' },
-  { name: 'Mike Johnson', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704c' },
-  { name: 'Emily Davis', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+  { name: 'R4JpUT_BoY', avatar: 'https://i.pravatar.cc/150?u=R4JpUT_BoY' },
+  { name: 'Xx_Venom_xX', avatar: 'https://i.pravatar.cc/150?u=Xx_Venom_xX' },
+  { name: 'Daku_99', avatar: 'https://i.pravatar.cc/150?u=Daku_99' },
+  { name: 'Shadow_King', avatar: 'https://i.pravatar.cc/150?u=Shadow_King' },
+  { name: 'RDX_Ansh', avatar: 'https://i.pravatar.cc/150?u=RDX_Ansh' },
+  { name: 'UtkxSh', avatar: 'https://i.pravatar.cc/150?u=UtkxSh' },
+  { name: 'Killer_OP', avatar: 'https://i.pravatar.cc/150?u=Killer_OP' },
+  { name: 'MR_LOOT3R', avatar: 'https://i.pravatar.cc/150?u=MR_LOOT3R' },
+  { name: 'Sniper_Ajay', avatar: 'https://i.pravatar.cc/150?u=Sniper_Ajay' },
+  { name: 'Thug_Rohit', avatar: 'https://i.pravatar.cc/150?u=Thug_Rohit' },
+  { name: 'Queen_Anu', avatar: 'https://i.pravatar.cc/150?u=Queen_Anu' },
+  { name: 'Angel_Riya', avatar: 'https://i.pravatar.cc/150?u=Angel_Riya' },
+  { name: 'Gamer_Priya', avatar: 'https://i.pravatar.cc/150?u=Gamer_Priya' },
+  { name: 'Xx_Nikita_xX', avatar: 'https://i.pravatar.cc/150?u=Xx_Nikita_xX' },
+  { name: 'Devil_Girl', avatar: 'https://i.pravatar.cc/150?u=Devil_Girl' },
 ];
 
 export function RightSidebar() {
