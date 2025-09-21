@@ -16,7 +16,7 @@ import { UraIcon } from '@/components/ura-icon';
 const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     {
     user: { id: 'user-1', name: 'URA Studio', avatar: `https://placehold.co/150x150/222/fff?text=U`, isMonetized: false, totalViews: 0, totalLikes: 0 },
-    content: 'Welcome to the new URA Social platform! This is the beginning of something amazing. We are building a community-focused social network.',
+    content: 'Welcome to the new URA-X platform! This is the beginning of something amazing. We are building a community-focused social network.',
     image: 'https://picsum.photos/seed/1/800/600',
     imageHint: 'abstract tech',
     likes: {},
@@ -135,16 +135,15 @@ export default function HomePage() {
             const userPosts = posts.filter(p => p.user.id === currentUser.id);
             const totalViews = userPosts.reduce((acc, post) => acc + (post.views || 0), 0);
             const totalLikes = userPosts.reduce((acc, post) => acc + Object.keys(post.likes || {}).length, 0);
-            const canBeMonetized = userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 25);
             
             const userRef = ref(db, `users/${currentUser.id}`);
             const updates: Partial<User> = {};
 
-            if (totalViews !== currentUser.totalViews) updates.totalViews = totalViews;
-            if (totalLikes !== currentUser.totalLikes) updates.totalLikes = totalLikes;
-            if (canBeMonetized && !currentUser.isMonetized) {
-                // This is an example of auto-monetization. A manual request flow is in analytics page.
-                // updates.isMonetized = true; 
+            if (totalViews !== currentUser.totalViews) {
+                updates.totalViews = totalViews;
+            }
+            if (totalLikes !== currentUser.totalLikes) {
+                updates.totalLikes = totalLikes;
             }
             
             if (Object.keys(updates).length > 0) {
@@ -269,7 +268,6 @@ export default function HomePage() {
 
   const handleUpdateProfile = (name: string, avatarUrl: string) => {
     if (!currentUser) return;
-    const updatedUser = { ...currentUser, name, avatar: avatarUrl };
     
     // Update user in Firebase DB
     const userRef = ref(db, `users/${currentUser.id}`);
