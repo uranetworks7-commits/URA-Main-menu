@@ -10,6 +10,7 @@ import {
   Flag,
   Settings,
   ShieldQuestion,
+  LogOut,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
@@ -19,6 +20,7 @@ import type { User } from './post-card';
 
 interface LeftSidebarProps {
     currentUser: User | null;
+    onLogout: () => void;
 }
 
 const mainLinks = [
@@ -37,7 +39,7 @@ const settingLinks = [
   { icon: ShieldQuestion, label: 'Help & Support' },
 ];
 
-export function LeftSidebar({ currentUser }: LeftSidebarProps) {
+export function LeftSidebar({ currentUser, onLogout }: LeftSidebarProps) {
   return (
     <aside className="hidden md:block w-80 bg-card border-r border-border">
       <ScrollArea className="h-full p-4">
@@ -57,6 +59,10 @@ export function LeftSidebar({ currentUser }: LeftSidebarProps) {
               <span className="font-semibold">{label}</span>
             </Button>
           ))}
+           <Button variant="ghost" className="w-full justify-start gap-3 px-3" onClick={onLogout}>
+              <LogOut className="h-5 w-5 text-primary" />
+              <span className="font-semibold">Logout</span>
+            </Button>
         </nav>
         <Separator className="my-4" />
         <h3 className="px-3 text-sm font-semibold text-muted-foreground">Your shortcuts</h3>
