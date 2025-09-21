@@ -153,16 +153,37 @@ const initialPosts: Post[] = [
 ];
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Check if user data exists in local storage
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
-    }
+    setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      // Check if user data exists in local storage
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser));
+      }
+
+      // Check for posts in local storage
+      const savedPosts = localStorage.getItem('socialPosts');
+      if (savedPosts) {
+        setPosts(JSON.parse(savedPosts));
+      } else {
+        setPosts(initialPosts);
+      }
+    }
+  }, [isClient]);
+
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('socialPosts', JSON.stringify(posts));
+    }
+  }, [posts, isClient]);
 
   const handleCreatePost = (content: string) => {
     if (!currentUser) return;
@@ -170,6 +191,7 @@ export default function HomePage() {
       id: `post-${Date.now()}`,
       user: currentUser,
       content,
+      image: `https://picsum.photos/seed/${Date.now()}/800/600`,
       stats: {
         likes: '0',
         comments: '0',
@@ -215,6 +237,10 @@ export default function HomePage() {
     setCurrentUser(null);
   };
 
+  if (!isClient) {
+    return null; // or a loading spinner
+  }
+
   if (!currentUser) {
     return <LoginPage onLogin={handleLogin} />;
   }
@@ -246,3 +272,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
