@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { ref, onValue, update } from "firebase/database";
-import type { Post, User } from '@/components/post-card';
+import type { Post, User, Withdrawal } from '@/components/post-card';
 import { Header } from '@/components/header';
 import { LeftSidebar } from '@/components/left-sidebar';
 import { RightSidebar } from '@/components/right-sidebar';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper } from 'lucide-react';
+import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +64,7 @@ export default function AnalyticsPage() {
   }, [posts, currentUser]);
 
   const canBeMonetized = useMemo(() => {
-      return userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 5);
+      return userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 10);
   }, [userPosts]);
 
   const handleRequestMonetization = () => {
@@ -80,7 +80,7 @@ export default function AnalyticsPage() {
     } else {
       toast({
         title: "Monetization Requirements Not Met",
-        description: "You need at least one post with over 1,000 views and 5 likes.",
+        description: "You need at least one post with over 1,000 views and 10 likes.",
         variant: "destructive",
       });
     }
@@ -101,6 +101,11 @@ export default function AnalyticsPage() {
   }, [currentUser?.withdrawals]);
   
   const availableBalance = useMemo(() => totalRevenue - totalWithdrawals, [totalRevenue, totalWithdrawals]);
+
+  const withdrawalHistory = useMemo(() => {
+    if (!currentUser?.withdrawals) return [];
+    return Object.values(currentUser.withdrawals).sort((a, b) => b.timestamp - a.timestamp);
+  }, [currentUser?.withdrawals]);
 
 
   const totalViews = currentUser?.totalViews || 0;
@@ -133,7 +138,7 @@ export default function AnalyticsPage() {
             onUpdateProfile={() => {}} // Not needed on this page
             userPosts={userPosts}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
             <Card>
                 <CardHeader>
                     <div className="flex items-center justify-between">
@@ -212,7 +217,7 @@ export default function AnalyticsPage() {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
                                 const revenue = currentUser.isMonetized ? (views / 1250) * 25 : 0;
-                                const isPostEligibleForMonetization = views > 1000 && likes >= 5;
+                                const isPostEligibleForMonetization = views > 1000 && likes >= 10;
 
                                 return (
                                     <TableRow key={post.id}>
@@ -249,6 +254,45 @@ export default function AnalyticsPage() {
                     </Table>
                 </CardContent>
             </Card>
+
+            {currentUser.isMonetized && withdrawalHistory.length > 0 && (
+                 <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                             <History className="h-6 w-6" />
+                            <div>
+                                <CardTitle>Redeemed History</CardTitle>
+                                <CardDescription>A log of all your past withdrawals.</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Redeem Code</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
+                                    <TableHead className="text-right">Fee</TableHead>
+                                    <TableHead className="text-right">Total Deducted</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {withdrawalHistory.map((withdrawal, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{format(new Date(withdrawal.timestamp), 'dd MMM yyyy, h:mm a')}</TableCell>
+                                        <TableCell className="font-mono">...{withdrawal.redeemCode.slice(-4)}</TableCell>
+                                        <TableCell className="text-right">₹{withdrawal.amount.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right text-destructive">₹{withdrawal.fee.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right font-bold">₹{withdrawal.totalDeducted.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            )}
+
         </main>
         <RightSidebar />
       </div>
