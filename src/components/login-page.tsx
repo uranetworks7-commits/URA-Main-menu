@@ -31,7 +31,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onLogin(values.name, values.avatarUrl);
+    const userId = `user-${values.name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`;
+    const avatar = values.avatarUrl || `https://i.pravatar.cc/150?u=${userId}`;
+    onLogin(values.name, avatar);
   }
 
   return (

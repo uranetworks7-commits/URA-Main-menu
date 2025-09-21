@@ -46,6 +46,7 @@ export default function HomePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -108,11 +109,11 @@ export default function HomePage() {
         const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
         
         posts.forEach(post => {
-            if (post.createdAt > fiveDaysAgo) {
+            if (post.createdAt > fiveDaysAgo && (post.views || 0) < 2000) {
                 const viewsRef = ref(db, `posts/${post.id}/views`);
                 const currentViews = post.views || 0;
                 const newViews = currentViews + Math.floor(Math.random() * 29) + 1;
-                set(viewsRef, newViews);
+                set(viewsRef, Math.min(newViews, 2000));
             }
         });
     }, 60000); // Update every minute to simulate daily increase
@@ -216,7 +217,7 @@ export default function HomePage() {
     const newUser: User = {
       id: userId,
       name: name,
-      avatar: avatarUrl || '',
+      avatar: avatarUrl || `https://i.pravatar.cc/150?u=${userId}`,
     };
     
     // Save user to Firebase
@@ -237,6 +238,15 @@ export default function HomePage() {
     return posts.filter(post => post.user.id === currentUser.id);
   }, [posts, currentUser]);
 
+  const filteredPosts = useMemo(() => {
+    if (!searchQuery) {
+      return posts;
+    }
+    return posts.filter(post =>
+      post.user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [posts, searchQuery]);
+
 
   if (!isClient) {
     return null; // or a loading spinner
@@ -255,6 +265,8 @@ export default function HomePage() {
         onLogout={handleLogout}
         onUpdateProfile={handleUpdateProfile}
         userPosts={userPosts}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar 
@@ -270,7 +282,7 @@ export default function HomePage() {
                 postCountToday={postCountToday}
             />
             <div className="space-y-4 mt-4">
-              {posts.map((post) => (
+              {filteredPosts.map((post) => (
                 <PostCard 
                     key={post.id} 
                     post={post} 

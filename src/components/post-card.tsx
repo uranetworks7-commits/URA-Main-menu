@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -121,14 +121,20 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPublisher = post.user.id === currentUser.id;
   const viewsCount = parseCount(post.views);
   
+  const isMonetized = useMemo(() => viewsCount > 1000 && likesCount > 50, [viewsCount, likesCount]);
+
   let revenue = 0;
-  if (isPublisher) {
+  if (isPublisher && isMonetized) {
       revenue = (viewsCount / 1000) * 25;
   }
   
   const timeAgo = useMemo(() => {
     if (!post.createdAt) return 'Just now';
-    return formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
+    try {
+      return formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
+    } catch (e) {
+      return 'just now'
+    }
   }, [post.createdAt]);
 
   const sortedComments = useMemo(() => {
@@ -147,7 +153,10 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <p className="font-bold text-foreground">{post.user.name}</p>
+            <div className="flex items-center gap-1">
+              <p className="font-bold text-foreground">{post.user.name}</p>
+              {isMonetized && <BadgeCheck className="h-5 w-5 text-blue-500" />}
+            </div>
             <p className="text-xs text-muted-foreground">Published · {timeAgo}</p>
           </div>
           <ReportDialog
@@ -168,6 +177,12 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                    <span>Published</span>
                  </DropdownMenuItem>
+                 {isMonetized && (
+                    <DropdownMenuItem className="text-blue-500">
+                      <BadgeCheck className="mr-2 h-4 w-4" />
+                      <span>Monetized</span>
+                    </DropdownMenuItem>
+                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem disabled>
                   <Eye className="mr-2 h-4 w-4" />

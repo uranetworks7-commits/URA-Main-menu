@@ -17,10 +17,12 @@ interface HeaderProps {
   onLogout: () => void;
   onUpdateProfile: (name: string, avatarUrl: string) => void;
   userPosts: Post[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 
-export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: HeaderProps) {
+export function Header({ currentUser, onLogout, onUpdateProfile, userPosts, searchQuery, setSearchQuery }: HeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between h-14 px-4 bg-card border-b border-border shadow-sm">
@@ -46,7 +48,12 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
         </div>
         <div className="relative ml-4 hidden md:block">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search URA Social" className="pl-8 w-64 bg-background" />
+          <Input 
+            placeholder="Search users..." 
+            className="pl-8 w-64 bg-background" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </div>
       <nav className="hidden md:flex items-center gap-2">

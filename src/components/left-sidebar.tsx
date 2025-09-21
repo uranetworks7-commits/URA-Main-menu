@@ -11,8 +11,10 @@ import {
   Settings,
   ShieldQuestion,
   LogOut,
-  DollarSign
+  DollarSign,
+  BarChart,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
@@ -33,6 +35,7 @@ interface LeftSidebarProps {
 const mainLinks = [
   { icon: Users, label: 'Friends' },
   { icon: Rss, label: 'Feeds' },
+  { icon: BarChart, label: 'Analytics', href: '/analytics' },
   { icon: Store, label: 'Marketplace' },
   { icon: Clapperboard, label: 'Watch' },
   { icon: Calendar, label: 'Events' },
@@ -51,8 +54,13 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
   const totalRevenue = useMemo(() => {
     return userPosts.reduce((total, post) => {
         const views = post.views || 0;
-        const postRevenue = (views / 1000) * 25;
-        return total + postRevenue;
+        const likes = Object.keys(post.likes || {}).length;
+        const isMonetized = views > 1000 && likes > 50;
+        if (isMonetized) {
+          const postRevenue = (views / 1000) * 25;
+          return total + postRevenue;
+        }
+        return total;
     }, 0);
   }, [userPosts]);
 
@@ -73,12 +81,15 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
                 <span className="font-bold text-lg">{currentUser.name}</span>
               </Button>
            )}
-          {mainLinks.map(({ icon: Icon, label }) => (
-            <Button key={label} variant="ghost" className="w-full justify-start gap-3 px-3">
-              <Icon className="h-5 w-5 text-primary" />
-              <span className="font-semibold">{label}</span>
-            </Button>
-          ))}
+          {mainLinks.map(({ icon: Icon, label, href }) => {
+            const button = (
+              <Button key={label} variant="ghost" className="w-full justify-start gap-3 px-3">
+                <Icon className="h-5 w-5 text-primary" />
+                <span className="font-semibold">{label}</span>
+              </Button>
+            );
+            return href ? <Link href={href} key={label}>{button}</Link> : button;
+          })}
         </nav>
         <Separator className="my-4" />
         <Card>
