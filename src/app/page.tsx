@@ -164,18 +164,21 @@ export default function HomePage() {
         const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
         
         posts.forEach(post => {
-            const viewsRef = ref(db, `posts/${post.id}/views`);
             const currentViews = post.views || 0;
             let newViews = currentViews;
 
             if ((post.createdAt || 0) > fiveDaysAgo) {
-                // For posts newer than 5 days, add 1-19 views.
-                newViews += Math.floor(Math.random() * 19) + 1;
-            } else {
-                // For posts older than 5 days, add 1-3 views occasionally.
-                if (Math.random() < 0.3) { // 30% chance to get a view
-                    newViews += Math.floor(Math.random() * 3) + 1;
+                // For posts newer than 5 days
+                // 1% chance for a viral burst of 200 views
+                if (Math.random() < 0.01) {
+                    newViews += 200;
+                } else {
+                    // Otherwise, add 1-11 views
+                    newViews += Math.floor(Math.random() * 11) + 1;
                 }
+            } else {
+                // For posts older than 5 days, add 2-3 views
+                newViews += Math.floor(Math.random() * 2) + 2;
             }
             
             // Cap views at 2000
@@ -183,7 +186,7 @@ export default function HomePage() {
                 update(ref(db, `posts/${post.id}`), { views: Math.min(newViews, 2000) });
             }
         });
-    }, 1000 * 60 * 60 * 4); // Update every 4 hours to simulate daily increase
+    }, 1000 * 60 * 60); // Update every hour
 
     return () => clearInterval(interval);
   }, [isClient, posts]);
@@ -201,7 +204,7 @@ export default function HomePage() {
       return;
     }
 
-    const newPostData: Omit<Post, 'id' | 'image' | 'video'> & { image?: string; video?: string } = {
+    const newPostData: Omit<Post, 'id'> & { image?: string; video?: string } = {
       user: currentUser,
       content,
       likes: {},
@@ -380,3 +383,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
