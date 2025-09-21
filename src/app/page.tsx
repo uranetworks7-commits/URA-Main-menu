@@ -1,74 +1,98 @@
-import Link from 'next/link';
-import { User, Bot, UserCog, Info, Gamepad2, Users, Coins, LogOut } from 'lucide-react';
+'use client';
+
+import { useState } from 'react';
+import { User, Bot, UserCog, Info, Gamepad2, Users, Coins, LogOut, Home as HomeIcon } from 'lucide-react';
 import { MenuButton } from '@/components/menu-button';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  return (
-    <div className="flex flex-col min-h-screen bg-background p-4 sm:p-6 md:p-8 font-body">
-      <header className="relative w-full mb-8 sm:mb-12 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary font-headline">
-            Welcome To URA APP
-          </h1>
-        </div>
-        <Link href="file:///android_asset/htmlapp/root/pppp.html" aria-label="User Profile" className="p-2 rounded-full hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors">
-          <User className="h-8 w-8 text-primary hover:text-accent" />
-        </Link>
-      </header>
+  const [iframeSrc, setIframeSrc] = useState<string>('about:blank');
 
-      <main className="flex-grow flex items-center justify-center">
-        <div className="w-full max-w-4xl grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+  const handleMenuClick = (url: string) => {
+    setIframeSrc(url);
+  };
+
+  return (
+    <div className="flex h-screen bg-background font-body">
+      <aside className="w-64 flex flex-col p-4 border-r">
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold text-primary font-headline">
+            URA APP
+          </h1>
+        </header>
+        <nav className="flex flex-col gap-2 flex-grow">
+          <Button variant="ghost" className="justify-start gap-2" onClick={() => handleMenuClick('about:blank')}>
+            <HomeIcon className="h-5 w-5" />
+            <span>Home</span>
+          </Button>
           <MenuButton
-            href="file:///android_asset/htmlapp/root/menu1.html"
-            icon={<Bot className="h-10 w-10 sm:h-12 sm:w-12" />}
+            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu1.html')}
+            icon={<Bot className="h-6 w-6" />}
             label="Ai Services"
-            colorClassName="text-chart-1"
+            isButton={true}
           />
           <MenuButton
-            href="file:///android_asset/htmlapp/root/menu2.html"
-            icon={<UserCog className="h-10 w-10 sm:h-12 sm:w-12" />}
+            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu2.html')}
+            icon={<UserCog className="h-6 w-6" />}
             label="Account, UPDATES AND REPORT"
-            colorClassName="text-chart-2"
+            isButton={true}
           />
           <MenuButton
-            href="file:///android_asset/htmlapp/root/menu3.html"
-            icon={<Info className="h-10 w-10 sm:h-12 sm:w-12" />}
+            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu3.html')}
+            icon={<Info className="h-6 w-6" />}
             label="More info & Features"
-            colorClassName="text-chart-3"
+            isButton={true}
           />
           <MenuButton
-            href="file:///android_asset/htmlapp/root/menu4.html"
-            icon={<Gamepad2 className="h-10 w-10 sm:h-12 sm:w-12" />}
+            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu4.html')}
+            icon={<Gamepad2 className="h-6 w-6" />}
             label="Gaming zone"
-            colorClassName="text-chart-4"
+            isButton={true}
           />
           <MenuButton
-            href="file:///android_asset/htmlapp/root/menu5.html"
-            icon={<Users className="h-10 w-10 sm:h-12 sm:w-12" />}
+            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu5.html')}
+            icon={<Users className="h-6 w-6" />}
             label="Public Features"
-            colorClassName="text-chart-5"
+            isButton={true}
           />
           <MenuButton
-            href="file:///android_asset/htmlapp/root/menu6.html"
-            icon={<Coins className="h-10 w-10 sm:h-12 sm:w-12" />}
+            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu6.html')}
+            icon={<Coins className="h-6 w-6" />}
             label="Lucks and trade"
-            colorClassName="text-chart-1"
+            isButton={true}
           />
-          <MenuButton
-            href="file:///android_asset/htmlapp/root/index.html"
-            icon={<LogOut className="h-10 w-10 sm:h-12 sm:w-12" />}
-            label="Exist Button"
-            className="col-span-2 lg:col-span-1 lg:col-start-2"
-            colorClassName="text-destructive"
+        </nav>
+        <div className="mt-auto flex flex-col gap-2">
+            <MenuButton
+                onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/index.html')}
+                icon={<LogOut className="h-6 w-6" />}
+                label="Exit Button"
+                colorClassName="text-destructive"
+                isButton={true}
+            />
+            <footer className="w-full text-center pt-4 border-t">
+              <p className="text-xs text-muted-foreground">
+                URA network @2025
+              </p>
+            </footer>
+        </div>
+      </aside>
+
+      <main className="flex-1 flex flex-col">
+        <header className="flex items-center justify-end p-2 border-b">
+           <Button variant="ghost" size="icon" aria-label="User Profile" onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/pppp.html')}>
+              <User className="h-6 w-6 text-primary" />
+            </Button>
+        </header>
+        <div className="flex-grow bg-white">
+          <iframe
+            id="frame"
+            src={iframeSrc}
+            className="w-full h-full border-0"
+            title="Content"
           />
         </div>
       </main>
-
-      <footer className="w-full text-center mt-8 sm:mt-12 pt-6 border-t">
-        <p className="text-sm text-muted-foreground">
-          URA network @2025 all right reserved
-        </p>
-      </footer>
     </div>
   );
 }
