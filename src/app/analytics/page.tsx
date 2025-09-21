@@ -138,63 +138,63 @@ export default function AnalyticsPage() {
             onUpdateProfile={() => {}} // Not needed on this page
             userPosts={userPosts}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
             <Card>
-                <CardHeader>
+                <CardHeader className="p-4">
                     <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-4">
+                         <div className="flex items-center gap-2">
                             <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                                <ArrowLeft className="h-6 w-6" />
+                                <ArrowLeft className="h-5 w-5" />
                             </Button>
                             <div>
-                                <CardTitle>Your Analytics</CardTitle>
-                                <CardDescription>An overview of your content performance.</CardDescription>
+                                <CardTitle className="text-xl">Your Analytics</CardTitle>
+                                <CardDescription className="text-xs">An overview of your content performance.</CardDescription>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                         {currentUser.isMonetized ? (
                             <>
-                                <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3">
-                                    <BadgeCheck className="mr-2 h-4 w-4"/>
-                                    Monetized Account
+                                <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-2">
+                                    <BadgeCheck className="mr-1 h-3 w-3"/>
+                                    Monetized
                                 </Badge>
-                                <Button onClick={() => setIsWithdrawDialogOpen(true)}>Withdraw</Button>
+                                <Button size="sm" onClick={() => setIsWithdrawDialogOpen(true)}>Withdraw</Button>
                             </>
                         ) : (
-                           <Button onClick={handleRequestMonetization}>Request Monetization</Button>
+                           <Button size="sm" onClick={handleRequestMonetization}>Request Monetization</Button>
                         )}
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <CardContent className="p-4 pt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Available for Withdrawal</CardTitle>
+                                <CardTitle className="text-xs font-medium">Available for Withdrawal</CardTitle>
                                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">₹{currentUser.isMonetized ? availableBalance.toFixed(2) : '0.00'}</div>
+                                <div className="text-xl font-bold">₹{currentUser.isMonetized ? availableBalance.toFixed(2) : '0.00'}</div>
                                 <p className="text-xs text-muted-foreground">{currentUser.isMonetized ? `Total revenue: ₹${totalRevenue.toFixed(2)}` : "Account not monetized"}</p>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+                                <CardTitle className="text-xs font-medium">Total Views</CardTitle>
                                 <Eye className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
+                                <div className="text-xl font-bold">{totalViews.toLocaleString()}</div>
                                 <p className="text-xs text-muted-foreground">across {userPosts.length} posts</p>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Likes</CardTitle>
+                                <CardTitle className="text-xs font-medium">Total Likes</CardTitle>
                                 <ThumbsUp className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">{totalLikes.toLocaleString()}</div>
+                                <div className="text-xl font-bold">{totalLikes.toLocaleString()}</div>
                                 <p className="text-xs text-muted-foreground">across all of your posts</p>
                             </CardContent>
                         </Card>
@@ -203,13 +203,13 @@ export default function AnalyticsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Post</TableHead>
-                                <TableHead>Created</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead className="text-right">Views</TableHead>
-                                <TableHead className="text-right">Likes</TableHead>
-                                <TableHead className="text-right">Comments</TableHead>
-                                <TableHead className="text-right">Revenue</TableHead>
+                                <TableHead className="text-xs">Post</TableHead>
+                                <TableHead className="text-xs">Created</TableHead>
+                                <TableHead className="text-center text-xs">Status</TableHead>
+                                <TableHead className="text-right text-xs">Views</TableHead>
+                                <TableHead className="text-right text-xs">Likes</TableHead>
+                                <TableHead className="text-right text-xs">Comments</TableHead>
+                                <TableHead className="text-right text-xs">Revenue</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -221,32 +221,32 @@ export default function AnalyticsPage() {
 
                                 return (
                                     <TableRow key={post.id}>
-                                        <TableCell className="max-w-xs truncate font-medium">{post.content}</TableCell>
-                                        <TableCell>{format(new Date(post.createdAt), 'dd MMM yyyy')}</TableCell>
+                                        <TableCell className="max-w-xs truncate font-medium text-xs">{post.content}</TableCell>
+                                        <TableCell className="text-xs">{format(new Date(post.createdAt), 'dd MMM yyyy')}</TableCell>
                                         <TableCell className="text-center">
                                             {currentUser.isMonetized ? (
                                                 revenue > 0 ? (
-                                                    <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                                                    <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
                                                         <PartyPopper className="mr-1 h-3 w-3" />
                                                         Earning
                                                     </Badge>
                                                 ) : (
-                                                    <Badge variant="secondary">No Earnings</Badge>
+                                                    <Badge variant="secondary" className="text-xs">No Earnings</Badge>
                                                 )
                                             ) : (
                                                 isPostEligibleForMonetization ? (
-                                                     <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                                                     <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
                                                         Eligible
                                                     </Badge>
                                                 ) : (
-                                                    <Badge variant="secondary">Not Eligible</Badge>
+                                                    <Badge variant="secondary" className="text-xs">Not Eligible</Badge>
                                                 )
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-right">{views.toLocaleString()}</TableCell>
-                                        <TableCell className="text-right">{likes.toLocaleString()}</TableCell>
-                                        <TableCell className="text-right">{Object.keys(post.comments || {}).length.toLocaleString()}</TableCell>
-                                        <TableCell className="text-right font-medium text-green-500">₹{revenue.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right text-xs">{views.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right text-xs">{likes.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right text-xs">{Object.keys(post.comments || {}).length.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right font-medium text-green-500 text-xs">₹{revenue.toFixed(2)}</TableCell>
                                     </TableRow>
                                 );
                             })}
@@ -257,34 +257,34 @@ export default function AnalyticsPage() {
 
             {currentUser.isMonetized && withdrawalHistory.length > 0 && (
                  <Card>
-                    <CardHeader>
+                    <CardHeader className="p-4">
                         <div className="flex items-center gap-2">
-                             <History className="h-6 w-6" />
+                             <History className="h-5 w-5" />
                             <div>
-                                <CardTitle>Redeemed History</CardTitle>
-                                <CardDescription>A log of all your past withdrawals.</CardDescription>
+                                <CardTitle className="text-xl">Redeemed History</CardTitle>
+                                <CardDescription className="text-xs">A log of all your past withdrawals.</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-4 pt-0">
                          <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Redeem Code</TableHead>
-                                    <TableHead className="text-right">Amount</TableHead>
-                                    <TableHead className="text-right">Fee</TableHead>
-                                    <TableHead className="text-right">Total Deducted</TableHead>
+                                    <TableHead className="text-xs">Date</TableHead>
+                                    <TableHead className="text-xs">Redeem Code</TableHead>
+                                    <TableHead className="text-right text-xs">Amount</TableHead>
+                                    <TableHead className="text-right text-xs">Fee</TableHead>
+                                    <TableHead className="text-right text-xs">Total Deducted</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {withdrawalHistory.map((withdrawal, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{format(new Date(withdrawal.timestamp), 'dd MMM yyyy, h:mm a')}</TableCell>
-                                        <TableCell className="font-mono">...{withdrawal.redeemCode.slice(-4)}</TableCell>
-                                        <TableCell className="text-right">₹{withdrawal.amount.toFixed(2)}</TableCell>
-                                        <TableCell className="text-right text-destructive">₹{withdrawal.fee.toFixed(2)}</TableCell>
-                                        <TableCell className="text-right font-bold">₹{withdrawal.totalDeducted.toFixed(2)}</TableCell>
+                                        <TableCell className="text-xs">{format(new Date(withdrawal.timestamp), 'dd MMM yyyy, h:mm a')}</TableCell>
+                                        <TableCell className="font-mono text-xs">...{withdrawal.redeemCode.slice(-4)}</TableCell>
+                                        <TableCell className="text-right text-xs">₹{withdrawal.amount.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right text-destructive text-xs">₹{withdrawal.fee.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right font-bold text-xs">₹{withdrawal.totalDeducted.toFixed(2)}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
