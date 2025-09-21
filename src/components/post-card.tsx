@@ -129,7 +129,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPostMonetized = useMemo(() => viewsCount > 1000 && likesCount >= 25, [viewsCount, likesCount]);
 
   let revenue = 0;
-  if (currentUser.isMonetized && isPostMonetized) {
+  if (isPostMonetized) {
       revenue = (viewsCount / 1250) * 25;
   }
   
@@ -203,7 +203,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                   <MessageSquare className="mr-2 h-4 w-4" />
                   <span>{formatCount(sortedComments.length)} Comments</span>
                 </DropdownMenuItem>
-                {isPublisher && revenue > 0 && (
+                {isPublisher && post.user.isMonetized && (
                    <DropdownMenuItem disabled className="text-green-500">
                       <DollarSign className="mr-2 h-4 w-4" />
                       <span>₹{revenue.toFixed(2)} Revenue</span>
@@ -267,7 +267,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
             <Eye className="h-4 w-4" />
             <span>{formatCount(viewsCount)}</span>
           </div>
-          {isPublisher && revenue > 0 && (
+          {isPublisher && post.user.isMonetized && (
              <div className="flex items-center gap-1 text-green-500">
                <DollarSign className="h-4 w-4" />
                <span>₹{revenue.toFixed(2)} Revenue</span>
