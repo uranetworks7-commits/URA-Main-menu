@@ -15,9 +15,9 @@ import {
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 const mainLinks = [
-  { icon: UserCircle, label: 'Your Name' }, // Placeholder
   { icon: Users, label: 'Friends' },
   { icon: Rss, label: 'Feeds' },
   { icon: Store, label: 'Marketplace' },
@@ -38,12 +38,24 @@ export function LeftSidebar() {
     <aside className="hidden md:block w-80 bg-card border-r border-border">
       <ScrollArea className="h-full p-4">
         <nav className="space-y-1">
+           <Button variant="ghost" className="w-full justify-start gap-3 px-3 h-14">
+              <Avatar>
+                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704c" />
+                  <AvatarFallback>YN</AvatarFallback>
+              </Avatar>
+              <span className="font-bold text-lg">Your Name</span>
+            </Button>
           {mainLinks.map(({ icon: Icon, label }) => (
             <Button key={label} variant="ghost" className="w-full justify-start gap-3 px-3">
               <Icon className="h-5 w-5 text-primary" />
               <span className="font-semibold">{label}</span>
             </Button>
           ))}
+        </nav>
+        <Separator className="my-4" />
+        <h3 className="px-3 text-sm font-semibold text-muted-foreground">Your shortcuts</h3>
+        <nav className="space-y-1 mt-2">
+            {/* Placeholder for shortcuts */}
         </nav>
         <Separator className="my-4" />
         <nav className="space-y-1">
