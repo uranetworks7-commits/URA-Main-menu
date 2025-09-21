@@ -87,6 +87,15 @@ export default function HomePage() {
     localStorage.setItem(key, (count + 1).toString());
   }, [currentUser, getTodayPostCount]);
 
+  const decrementTodayPostCount = useCallback(() => {
+    if (!currentUser) return;
+    const today = new Date().toISOString().split('T')[0];
+    const key = `postCount_${currentUser.id}_${today}`;
+    let count = getTodayPostCount();
+    count = Math.max(0, count - 1);
+    localStorage.setItem(key, count.toString());
+  }, [currentUser, getTodayPostCount]);
+
 
   useEffect(() => {
     if (isClient) {
@@ -161,27 +170,33 @@ export default function HomePage() {
     if (!isClient || posts.length === 0) return;
 
     const interval = setInterval(() => {
-        const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
+        const thirtySecondsAgo = Date.now() - 30 * 1000;
         
         posts.forEach(post => {
+            if ((post.createdAt || 0) > thirtySecondsAgo) {
+                // Skip posts newer than 30 seconds
+                return;
+            }
+
             const currentViews = post.views || 0;
+            const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
             let newViews = currentViews;
 
             if ((post.createdAt || 0) > fiveDaysAgo) {
                 // For posts newer than 5 days
-                // 1% chance for a viral burst of 200 views
-                if (Math.random() < 0.01) {
-                    newViews += 200;
+                // 5% chance for a viral burst of 100-350 views
+                if (Math.random() < 0.05) {
+                    newViews += Math.floor(Math.random() * 251) + 100; // 100 to 350
                 } else {
-                    // Otherwise, add 1-11 views
-                    newViews += Math.floor(Math.random() * 11) + 1;
+                    // Otherwise, add 1-25 views
+                    newViews += Math.floor(Math.random() * 25) + 1;
                 }
             } else {
-                // For posts older than 5 days, add 2-3 views
-                newViews += Math.floor(Math.random() * 2) + 2;
+                // For posts older than 5 days, add 1-3 views
+                newViews += Math.floor(Math.random() * 3) + 1;
             }
             
-            // Cap views at 2000
+            // Cap views at 2000 and update if changed
             if (newViews > currentViews) {
                 update(ref(db, `posts/${post.id}`), { views: Math.min(newViews, 2000) });
             }
@@ -225,8 +240,28 @@ export default function HomePage() {
   };
   
   const handleDeletePost = (postId: string) => {
+    if (!currentUser) return;
+
+    const postToDelete = posts.find(p => p.id === postId);
+    if (!postToDelete) return;
+
+    // Decrement stats
+    const viewsLost = postToDelete.views || 0;
+    const likesLost = Object.keys(postToDelete.likes || {}).length;
+    
+    const userRef = ref(db, `users/${currentUser.id}`);
+    const updates: Partial<User> = {
+        totalViews: Math.max(0, (currentUser.totalViews || 0) - viewsLost),
+        totalLikes: Math.max(0, (currentUser.totalLikes || 0) - likesLost),
+    };
+    update(userRef, updates);
+
+    // Remove post from DB
     const postRef = ref(db, `posts/${postId}`);
     remove(postRef);
+    
+    // Decrement daily post count
+    decrementTodayPostCount();
   };
   
   const handleReportPost = (postId: string, reason: string) => {
@@ -284,7 +319,7 @@ export default function HomePage() {
     });
   };
 
-  const handleLogin = async (name: string, avatarUrl?: string) => {
+ const handleLogin = async (name: string, avatarUrl?: string) => {
     const usersRef = ref(db, 'users');
     const q = query(usersRef, orderByChild('name'), equalTo(name));
     const snapshot = await get(q);
@@ -293,26 +328,15 @@ export default function HomePage() {
       // User exists, log them in
       const userData = snapshot.val();
       const userId = Object.keys(userData)[0];
-      const existingUser = userData[userId];
+      const existingUser = { id: userId, ...userData[userId] };
       localStorage.setItem('currentUser', JSON.stringify(existingUser));
       setCurrentUser(existingUser);
     } else {
-      // User does not exist, create new user
-      const userId = `user-${name.toLowerCase().replace(/\s/g, '-')}`;
-      const newUser: User = {
-        id: userId,
-        name: name,
-        avatar: avatarUrl || `https://placehold.co/150x150/222/fff?text=${name.charAt(0).toUpperCase()}`,
-        isMonetized: false,
-        totalViews: 0,
-        totalLikes: 0,
-      };
-      
-      const userRef = ref(db, `users/${userId}`);
-      await set(userRef, newUser);
-      
-      localStorage.setItem('currentUser', JSON.stringify(newUser));
-      setCurrentUser(newUser);
+        toast({
+            title: "Login Failed",
+            description: "No account with that name exists. Account creation is disabled.",
+            variant: "destructive",
+        });
     }
   };
   
