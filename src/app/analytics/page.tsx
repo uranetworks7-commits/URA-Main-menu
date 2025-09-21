@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck } from 'lucide-react';
+import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
@@ -72,8 +72,8 @@ export default function AnalyticsPage() {
       update(userRef, { isMonetized: true });
       setCurrentUser(prev => prev ? { ...prev, isMonetized: true } : null);
       toast({
-        title: "Congratulations!",
-        description: "Your account is now monetized.",
+        title: "Congratulations! You're Monetized!",
+        description: "You can now earn revenue from your posts.",
       });
     } else {
       toast({
@@ -138,9 +138,9 @@ export default function AnalyticsPage() {
                         </div>
                         <div>
                         {currentUser.isMonetized ? (
-                            <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
-                                <BadgeCheck className="mr-1 h-3 w-3"/>
-                                Monetized
+                            <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2">
+                                <BadgeCheck className="mr-2 h-4 w-4"/>
+                                Monetized Account
                             </Badge>
                         ) : (
                            <Button onClick={handleRequestMonetization}>Request Monetization</Button>
@@ -198,20 +198,31 @@ export default function AnalyticsPage() {
                             {userPosts.map(post => {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
-                                const isPostEligible = views > 1000 && likes >= 5;
                                 const revenue = currentUser.isMonetized ? (views / 1250) * 25 : 0;
-                                
+                                const isPostEligibleForMonetization = views > 1000 && likes >= 5;
+
                                 return (
                                     <TableRow key={post.id}>
                                         <TableCell className="max-w-xs truncate font-medium">{post.content}</TableCell>
                                         <TableCell>{format(new Date(post.createdAt), 'dd MMM yyyy')}</TableCell>
                                         <TableCell className="text-center">
-                                            {isPostEligible ? (
-                                                <Badge className="bg-green-500 hover:bg-green-600 text-white">
-                                                    Eligible
-                                                </Badge>
+                                            {currentUser.isMonetized ? (
+                                                revenue > 0 ? (
+                                                    <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                                                        <PartyPopper className="mr-1 h-3 w-3" />
+                                                        Earning
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="secondary">No Earnings</Badge>
+                                                )
                                             ) : (
-                                                 <Badge variant="secondary">Not Eligible</Badge>
+                                                isPostEligibleForMonetization ? (
+                                                     <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                                                        Eligible
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="secondary">Not Eligible</Badge>
+                                                )
                                             )}
                                         </TableCell>
                                         <TableCell className="text-right">{views.toLocaleString()}</TableCell>
