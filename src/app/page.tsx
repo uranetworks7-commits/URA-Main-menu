@@ -9,6 +9,8 @@ import { CreatePost } from '@/components/create-post';
 import { Header } from '@/components/header';
 import { LoginPage } from '@/components/login-page';
 import { useToast } from "@/hooks/use-toast";
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     {
@@ -264,8 +266,6 @@ export default function HomePage() {
         onLogout={handleLogout}
         onUpdateProfile={handleUpdateProfile}
         userPosts={userPosts}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
       />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar 
@@ -280,7 +280,16 @@ export default function HomePage() {
                 currentUser={currentUser}
                 postCountToday={postCountToday}
             />
-            <div className="space-y-4 mt-4">
+            <div className="relative my-4">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search users..." 
+                className="pl-8 w-full bg-card" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="space-y-4">
               {filteredPosts.map((post) => (
                 <PostCard 
                     key={post.id} 

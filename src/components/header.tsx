@@ -18,12 +18,10 @@ interface HeaderProps {
   onLogout: () => void;
   onUpdateProfile: (name: string, avatarUrl: string) => void;
   userPosts: Post[];
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
 }
 
 
-export function Header({ currentUser, onLogout, onUpdateProfile, userPosts, searchQuery, setSearchQuery }: HeaderProps) {
+export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: HeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between h-14 px-4 bg-card border-b border-border shadow-sm">
@@ -46,15 +44,6 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts, sear
               viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path><path d="M2 7L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path><path d="M12 22V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path><path d="M22 7L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path><path d="M17 4.5L7 9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
             </svg>
           <h1 className="text-xl font-bold text-primary hidden sm:block">URA Social</h1>
-        </div>
-        <div className="relative ml-4 hidden md:block">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search users..." 
-            className="pl-8 w-64 bg-background" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
         </div>
       </div>
       <nav className="hidden md:flex items-center gap-2">
