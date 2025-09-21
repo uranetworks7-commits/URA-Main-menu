@@ -43,7 +43,7 @@ export interface Post {
   video?: string;
   imageHint?: string;
   likes: { [key: string]: boolean };
-  comments: Comment[];
+  comments: { [key: string]: Comment };
   views: number;
   createdAt: number;
 }
@@ -126,7 +126,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isMonetized = useMemo(() => viewsCount > 1000 && likesCount > 50, [viewsCount, likesCount]);
 
   let revenue = 0;
-  if (isPublisher && isMonetized) {
+  if (isMonetized) {
       revenue = (viewsCount / 1000) * 25;
   }
   
@@ -140,7 +140,10 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   }, [post.createdAt]);
 
   const sortedComments = useMemo(() => {
-    return post.comments ? Object.values(post.comments).sort((a, b) => a.createdAt - b.createdAt) : [];
+    if (!post.comments) return [];
+    return Object.entries(post.comments)
+      .map(([id, comment]) => ({ ...comment, id }))
+      .sort((a, b) => a.createdAt - b.createdAt);
   }, [post.comments]);
 
 

@@ -13,6 +13,7 @@ import {
   LogOut,
   DollarSign,
   BarChart,
+  BadgeCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
@@ -24,6 +25,7 @@ import { ProfileSettingsDialog } from './profile-settings-dialog';
 import type { User, Post } from './post-card';
 import { UraIcon } from './ura-icon';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
 
 interface LeftSidebarProps {
     currentUser: User | null;
@@ -50,17 +52,25 @@ const settingLinks = [
 export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts }: LeftSidebarProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const totalRevenue = useMemo(() => {
-    return userPosts.reduce((total, post) => {
+  const { totalRevenue, isMonetized } = useMemo(() => {
+    const revenue = userPosts.reduce((total, post) => {
         const views = post.views || 0;
         const likes = Object.keys(post.likes || {}).length;
-        const isMonetized = views > 1000 && likes > 50;
-        if (isMonetized) {
+        const isPostMonetized = views > 1000 && likes > 50;
+        if (isPostMonetized) {
           const postRevenue = (views / 1000) * 25;
           return total + postRevenue;
         }
         return total;
     }, 0);
+
+    const hasMonetizedPost = userPosts.some(post => {
+        const views = post.views || 0;
+        const likes = Object.keys(post.likes || {}).length;
+        return views > 1000 && likes > 50;
+    });
+
+    return { totalRevenue: revenue, isMonetized: hasMonetizedPost };
   }, [userPosts]);
 
   if (!currentUser) return null;
@@ -80,15 +90,12 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
                 <span className="font-bold text-lg">{currentUser.name}</span>
               </Button>
            )}
-          {mainLinks.map(({ icon: Icon, label, href }) => {
-            const button = (
-              <Button key={label} variant="ghost" className="w-full justify-start gap-3 px-3">
-                <Icon className="h-5 w-5 text-primary" />
-                <span className="font-semibold">{label}</span>
-              </Button>
-            );
-            return href ? <Link href={href} key={label}>{button}</Link> : button;
-          })}
+          {mainLinks.map(({ icon: Icon, label }) => (
+            <Button key={label} variant="ghost" className="w-full justify-start gap-3 px-3">
+              <Icon className="h-5 w-5 text-primary" />
+              <span className="font-semibold">{label}</span>
+            </Button>
+          ))}
         </nav>
         <Separator className="my-4" />
         <Card>
@@ -96,6 +103,17 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
                 <CardTitle className="text-base">Your Content & Revenue</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+                 <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Account Status</span>
+                     {isMonetized ? (
+                        <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
+                            <BadgeCheck className="mr-1 h-3 w-3"/>
+                            Monetized
+                        </Badge>
+                    ) : (
+                         <Badge variant="secondary">Unmonetized</Badge>
+                    )}
+                </div>
                  <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Total Posts</span>
                     <span className="font-bold">{userPosts.length}</span>

@@ -34,7 +34,7 @@ const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     content: 'Having fun building this new social app. What feature should I add next? Here is a post where I should be able to see revenue.',
     image: 'https://picsum.photos/seed/sub/800/600',
     imageHint: 'developer coding',
-    likes: {},
+    likes: { 'user-2': true, 'user-1': true },
     comments: [],
     views: 1500,
   },
@@ -91,7 +91,7 @@ export default function HomePage() {
             if (newPostRef.key) {
               const postWithTimestamp: Omit<Post, 'id'> = {
                 ...post,
-                createdAt: Date.now(),
+                createdAt: Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 3), // random post from last 3 days
               };
               set(newPostRef, postWithTimestamp);
             }
@@ -185,8 +185,7 @@ export default function HomePage() {
     if (!currentUser) return;
     const commentsRef = ref(db, `posts/${postId}/comments`);
     const newCommentRef = push(commentsRef);
-    const newComment: Comment = {
-      id: newCommentRef.key!,
+    const newComment: Omit<Comment, 'id'> = {
       user: currentUser,
       text: commentText,
       createdAt: Date.now(),
