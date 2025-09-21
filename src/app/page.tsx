@@ -47,9 +47,10 @@ function LoadingScreen() {
     return (
         <div className="fixed inset-0 bg-background flex items-center justify-center z-[100]">
             <div className="flex flex-col items-center gap-4">
-                <svg className="x-loader h-24 w-24 text-primary" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M 20 20 L 80 80" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-                    <path d="M 80 20 L 20 80" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                 <svg className="x-loader h-24 w-24 text-primary" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect className="box" x="10" y="10" width="80" height="80" rx="10" ry="10" stroke="currentColor" strokeWidth="6" fill="none" />
+                    <path className="x-line-1" d="M 30 30 L 70 70" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                    <path className="x-line-2" d="M 70 30 L 30 70" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                 </svg>
                 <h1 className="text-3xl font-bold text-primary animate-pulse">URA-X</h1>
             </div>

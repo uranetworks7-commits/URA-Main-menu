@@ -39,10 +39,7 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
           </SheetContent>
         </Sheet>
         <div className="flex items-center gap-2">
-           <svg className="h-8 w-8 text-primary" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M 20 20 L 80 80" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
-                <path d="M 80 20 L 20 80" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
-            </svg>
+           <UraIcon className="h-8 w-8" />
           <h1 className="text-xl font-bold text-primary hidden sm:block">URA-X</h1>
         </div>
       </div>
