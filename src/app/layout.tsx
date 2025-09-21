@@ -1,10 +1,13 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'URA Hub',
-  description: 'Main Menu for the URA Application',
+  title: 'URA Social',
+  description: 'A new social media experience',
 };
 
 export default function RootLayout({
@@ -14,12 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased overflow-hidden">
+      <body className={`${inter.className} bg-background text-foreground antialiased`}>
         {children}
         <Toaster />
       </body>

@@ -1,144 +1,73 @@
 'use client';
+import { LeftSidebar } from '@/components/left-sidebar';
+import { RightSidebar } from '@/components/right-sidebar';
+import { PostCard, Post } from '@/components/post-card';
+import { CreatePost } from '@/components/create-post';
+import { Header } from '@/components/header';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { useState } from 'react';
-import { User, Bot, UserCog, Info, Gamepad2, Users, Coins, LogOut, ArrowLeft } from 'lucide-react';
-import { MenuButton } from '@/components/menu-button';
-import { Button } from '@/components/ui/button';
+// Initialize Firebase (placeholder)
+// To enable Firebase, you would create a firebase.ts file and import it here
+// import { app } from '@/lib/firebase';
 
-export default function Home() {
-  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
-
-  const handleMenuClick = (url: string) => {
-    setIframeSrc(url);
-  };
-
-  const handleBackClick = () => {
-    setIframeSrc(null);
+const posts: Post[] = [
+  {
+    id: '1',
+    user: { name: 'URA Studio', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+    content: 'Welcome to the new URA Social platform! This is the beginning of something amazing. We are building a community-focused social network.',
+    image: 'https://picsum.photos/seed/1/800/600',
+    imageHint: 'abstract tech',
+    stats: {
+      likes: '1.2k',
+      comments: '48',
+      views: '15.7k',
+      revenue: '$25.50'
+    }
+  },
+  {
+    id: '2',
+    user: { name: 'Dev Team', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704e' },
+    content: 'Just pushed a major update! The feed now looks cleaner and loads faster. Let us know what you think of the new design. #webdev #react #nextjs',
+    image: 'https://picsum.photos/seed/2/800/500',
+    imageHint: 'coding computer',
+    stats: {
+      likes: '876',
+      comments: '112',
+      views: '12.1k',
+      revenue: '$18.20'
+    }
+  },
+  {
+    id: '3',
+    user: { name: 'Community Manager', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704f' },
+    content: 'Planning our next community event. What topics are you most interested in? Drop your suggestions below! We want to hear from you.',
+    image: 'https://picsum.photos/seed/3/800/700',
+    imageHint: 'community event',
+    stats: {
+      likes: '452',
+      comments: '230',
+      views: '9.8k',
+      revenue: '$12.75'
+    }
   }
+];
 
-  if (iframeSrc) {
-    return (
-      <div className="flex flex-col h-screen bg-background font-body">
-        <header className="flex items-center p-2 border-b">
-           <Button variant="ghost" size="icon" aria-label="Back to menu" onClick={handleBackClick}>
-              <ArrowLeft className="h-6 w-6 text-primary" />
-            </Button>
-        </header>
-        <div className="flex-grow bg-white">
-          <iframe
-            id="frame"
-            src={iframeSrc}
-            className="w-full h-full border-0"
-            title="Content"
-          />
-        </div>
-      </div>
-    );
-  }
-
+export default function HomePage() {
   return (
-    <div className="flex flex-col h-screen bg-background font-body">
-      <header className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-3">
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-primary"
-            >
-              <path
-                d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M2 7L12 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M12 22V12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M22 7L12 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M17 4.5L7 9.5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <h1 className="text-2xl font-bold tracking-tight text-primary">
-              URA APP
-            </h1>
-        </div>
-        <Button variant="ghost" size="icon" aria-label="User Profile" onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/pppp.html')}>
-            <User className="h-6 w-6 text-primary" />
-        </Button>
-      </header>
-
-      <main className="flex-1 overflow-auto p-4 sm:p-6 md:p-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          <MenuButton
-            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu1.html')}
-            icon={<Bot className="h-10 w-10" />}
-            label="Ai Services"
-          />
-          <MenuButton
-            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu2.html')}
-            icon={<UserCog className="h-10 w-10" />}
-            label="Account, UPDATES AND REPORT"
-          />
-          <MenuButton
-            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu3.html')}
-            icon={<Info className="h-10 w-10" />}
-            label="More info & Features"
-          />
-          <MenuButton
-            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu4.html')}
-            icon={<Gamepad2 className="h-10 w-10" />}
-            label="Gaming zone"
-          />
-          <MenuButton
-            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu5.html')}
-            icon={<Users className="h-10 w-10" />}
-            label="Public Features"
-          />
-          <MenuButton
-            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu6.html')}
-            icon={<Coins className="h-10 w-10" />}
-            label="Lucks and trade"
-          />
-          <MenuButton
-            onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/index.html')}
-            icon={<LogOut className="h-10 w-10" />}
-            label="Exit Button"
-            colorClassName="text-destructive"
-          />
-        </div>
-      </main>
-
-       <footer className="w-full text-center p-4 border-t">
-          <p className="text-xs text-muted-foreground">
-            URA network @2025
-          </p>
-        </footer>
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            <CreatePost />
+            <div className="space-y-4 mt-4">
+              {posts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+        </main>
+        <RightSidebar />
+      </div>
     </div>
   );
 }
