@@ -97,37 +97,37 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           <MenuButton
             onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu1.html')}
-            icon={<Bot className="h-8 w-8" />}
+            icon={<Bot className="h-10 w-10" />}
             label="Ai Services"
           />
           <MenuButton
             onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu2.html')}
-            icon={<UserCog className="h-8 w-8" />}
+            icon={<UserCog className="h-10 w-10" />}
             label="Account, UPDATES AND REPORT"
           />
           <MenuButton
             onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu3.html')}
-            icon={<Info className="h-8 w-8" />}
+            icon={<Info className="h-10 w-10" />}
             label="More info & Features"
           />
           <MenuButton
             onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu4.html')}
-            icon={<Gamepad2 className="h-8 w-8" />}
+            icon={<Gamepad2 className="h-10 w-10" />}
             label="Gaming zone"
           />
           <MenuButton
             onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu5.html')}
-            icon={<Users className="h-8 w-8" />}
+            icon={<Users className="h-10 w-10" />}
             label="Public Features"
           />
           <MenuButton
             onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/menu6.html')}
-            icon={<Coins className="h-8 w-8" />}
+            icon={<Coins className="h-10 w-10" />}
             label="Lucks and trade"
           />
           <MenuButton
             onClick={() => handleMenuClick('file:///android_asset/htmlapp/root/index.html')}
-            icon={<LogOut className="h-8 w-8" />}
+            icon={<LogOut className="h-10 w-10" />}
             label="Exit Button"
             colorClassName="text-destructive"
           />
