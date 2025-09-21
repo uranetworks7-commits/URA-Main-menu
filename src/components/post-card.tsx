@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, BarChart } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, BarChart, Link } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -103,7 +103,20 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   };
 
   const handleShare = () => {
-    alert('Share functionality is not yet implemented.');
+    const postUrl = `${window.location.origin}/post/${post.id}`;
+    navigator.clipboard.writeText(postUrl).then(() => {
+      toast({
+        title: "Link Copied!",
+        description: "The post link has been copied to your clipboard.",
+      });
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+      toast({
+        title: "Failed to Copy",
+        description: "Could not copy the link to your clipboard.",
+        variant: "destructive",
+      });
+    });
   };
   
   const handleCommentSubmit = () => {
@@ -134,7 +147,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPublisher = post.user.id === currentUser.id;
   const viewsCount = parseCount(post.views);
   
-  const isPostEligible = useMemo(() => viewsCount > 1000 && likesCount >= 5, [viewsCount, likesCount]);
+  const isPostEligible = useMemo(() => viewsCount > 1000 && likesCount >= 10, [viewsCount, likesCount]);
 
   let revenue = 0;
   if (post.user.isMonetized) {
