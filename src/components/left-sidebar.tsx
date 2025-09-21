@@ -59,7 +59,7 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
         const likes = Object.keys(post.likes || {}).length;
         const isPostMonetized = views > 1000 && likes >= 25;
         if (isPostMonetized) {
-          const postRevenue = (views / 1000) * 25;
+          const postRevenue = (views / 1250) * 25;
           return total + postRevenue;
         }
         return total;
@@ -114,8 +114,7 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Total Revenue</span>
                     <span className="font-bold text-green-500 flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        {totalRevenue.toFixed(2)}
+                        ₹{totalRevenue.toFixed(2)}
                     </span>
                 </div>
             </CardContent>

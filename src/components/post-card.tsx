@@ -130,7 +130,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
 
   let revenue = 0;
   if (currentUser.isMonetized && isPostMonetized) {
-      revenue = (viewsCount / 1000) * 25;
+      revenue = (viewsCount / 1250) * 25;
   }
   
   const timeAgo = useMemo(() => {

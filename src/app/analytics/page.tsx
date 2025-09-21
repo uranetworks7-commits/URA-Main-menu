@@ -93,7 +93,7 @@ export default function AnalyticsPage() {
     const likes = Object.keys(post.likes || {}).length;
     const isPostMonetized = views > 1000 && likes >= 25;
     if (isPostMonetized) {
-      const postRevenue = (views / 1000) * 25;
+      const postRevenue = (views / 1250) * 25;
       return total + postRevenue;
     }
     return total;
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
                                 const isPostMonetized = views > 1000 && likes >= 25;
-                                const revenue = currentUser.isMonetized && isPostMonetized ? (views / 1000) * 25 : 0;
+                                const revenue = currentUser.isMonetized && isPostMonetized ? (views / 1250) * 25 : 0;
                                 
                                 return (
                                     <TableRow key={post.id}>
