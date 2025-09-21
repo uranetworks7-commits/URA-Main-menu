@@ -10,14 +10,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 interface LoginPageProps {
-  onLogin: (name: string, avatarUrl?: string) => void;
+  onLogin: (name: string, mainAccountUsername: string) => void;
 }
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  avatarUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  mainAccountUsername: z.string().min(2, {
+    message: "Main account username must be at least 2 characters.",
+  }),
 });
 
 
@@ -26,13 +28,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      avatarUrl: "",
+      mainAccountUsername: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const avatar = values.avatarUrl || `https://placehold.co/150x150/222/fff?text=${values.name.charAt(0).toUpperCase()}`;
-    onLogin(values.name, avatar);
+    onLogin(values.name, values.mainAccountUsername);
   }
 
   return (
@@ -46,8 +47,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 </svg>
                   <h1 className="text-3xl font-bold text-primary">URA-X</h1>
             </div>
-          <CardTitle>Welcome</CardTitle>
-          <CardDescription>Enter your name to join the conversation</CardDescription>
+          <CardTitle>Welcome Back</CardTitle>
+          <CardDescription>Enter your credentials to log in</CardDescription>
         </CardHeader>
         <CardContent>
            <Form {...form}>
@@ -57,9 +58,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Name</FormLabel>
+                    <FormLabel>Your Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. John Doe" {...field} />
+                      <Input placeholder="e.g. JohnDoe" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -67,12 +68,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               />
               <FormField
                 control={form.control}
-                name="avatarUrl"
+                name="mainAccountUsername"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Profile Picture URL (Optional)</FormLabel>
+                    <FormLabel>Main Account Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.png" {...field} />
+                      <Input placeholder="e.g. MainAccount" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

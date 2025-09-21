@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, BarChart, Link } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, BarChart } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -34,6 +34,7 @@ export interface User {
   id: string;
   name: string;
   avatar: string;
+  mainAccountUsername?: string;
   isMonetized?: boolean;
   totalViews?: number;
   totalLikes?: number;
@@ -314,8 +315,8 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                 <h4 className="text-sm font-semibold mb-2">Comments</h4>
                 <div className="space-y-3 mb-4">
                     {sortedComments.length > 0 ? (
-                        sortedComments.map((comment) => (
-                            <div key={comment.id} className="flex items-start gap-2 text-xs">
+                        sortedComments.map((comment, index) => (
+                            <div key={index} className="flex items-start gap-2 text-xs">
                                 <Avatar className="h-6 w-6">
                                     <AvatarImage src={comment.user.avatar} />
                                     <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>

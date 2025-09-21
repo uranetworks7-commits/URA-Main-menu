@@ -319,18 +319,27 @@ export default function HomePage() {
     });
   };
 
- const handleLogin = async (name: string, avatarUrl?: string) => {
+ const handleLogin = async (name: string, mainAccountUsername: string) => {
     const usersRef = ref(db, 'users');
     const q = query(usersRef, orderByChild('name'), equalTo(name));
     const snapshot = await get(q);
 
     if (snapshot.exists()) {
-      // User exists, log them in
       const userData = snapshot.val();
       const userId = Object.keys(userData)[0];
       const existingUser = { id: userId, ...userData[userId] };
-      localStorage.setItem('currentUser', JSON.stringify(existingUser));
-      setCurrentUser(existingUser);
+      
+      // Check if main account username matches
+      if (existingUser.mainAccountUsername === mainAccountUsername) {
+        localStorage.setItem('currentUser', JSON.stringify(existingUser));
+        setCurrentUser(existingUser);
+      } else {
+         toast({
+            title: "Login Failed",
+            description: "The main account username is incorrect.",
+            variant: "destructive",
+        });
+      }
     } else {
         toast({
             title: "Login Failed",
