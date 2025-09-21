@@ -8,14 +8,16 @@ import { Textarea } from './ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import type { User } from './post-card';
 import { UraIcon } from './ura-icon';
+import { Progress } from './ui/progress';
 
 
 interface CreatePostProps {
   onCreatePost: (content: string) => void;
   currentUser: User;
+  postCountToday: number;
 }
 
-export function CreatePost({ onCreatePost, currentUser }: CreatePostProps) {
+export function CreatePost({ onCreatePost, currentUser, postCountToday }: CreatePostProps) {
   const [postContent, setPostContent] = useState('');
 
   const handlePost = () => {
@@ -24,6 +26,9 @@ export function CreatePost({ onCreatePost, currentUser }: CreatePostProps) {
       setPostContent('');
     }
   };
+  
+  const postLimit = 10;
+  const postsLeft = postLimit - postCountToday;
 
   return (
     <Card>
@@ -42,6 +47,10 @@ export function CreatePost({ onCreatePost, currentUser }: CreatePostProps) {
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
             />
+             <div className="mt-2 text-xs text-muted-foreground">
+                <p>Daily Post Limit: {postCountToday} / {postLimit}</p>
+                <Progress value={(postCountToday / postLimit) * 100} className="h-1 mt-1" />
+             </div>
           </div>
         </div>
         <Separator className="my-3" />
@@ -57,7 +66,7 @@ export function CreatePost({ onCreatePost, currentUser }: CreatePostProps) {
                 <ImageIcon className="h-6 w-6 text-blue-500" /> Video
             </Button>
           </div>
-          <Button onClick={handlePost} disabled={!postContent.trim()}>
+          <Button onClick={handlePost} disabled={!postContent.trim() || postCountToday >= postLimit}>
             Post
           </Button>
         </div>

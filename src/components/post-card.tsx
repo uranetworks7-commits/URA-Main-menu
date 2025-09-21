@@ -3,8 +3,8 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from './ui/separator';
 import { UraIcon } from './ura-icon';
+import { Input } from './ui/input';
+import { formatDistanceToNow } from 'date-fns';
 
 export interface User {
   id: string;
@@ -24,8 +26,9 @@ export interface User {
 }
 export interface Comment {
     id: string;
-    user: { name: string };
+    user: User;
     text: string;
+    createdAt: number;
 }
 
 export interface Post {
@@ -34,23 +37,24 @@ export interface Post {
   content: string;
   image?: string;
   imageHint?: string;
-  stats: {
-    likes: string;
-    comments: string;
-    views: string;
-  };
+  likes: { [key: string]: boolean };
   comments: Comment[];
+  views: number;
+  createdAt: number;
 }
 
 interface PostCardProps {
   post: Post;
   currentUser: User;
   onDeletePost: (postId: string) => void;
+  onLikePost: (postId: string) => void;
+  onAddComment: (postId: string, commentText: string) => void;
 }
 
-const parseCount = (countStr: string): number => {
-    if (!countStr) return 0;
-    const lowerCaseStr = countStr.toLowerCase();
+const parseCount = (count: number | string): number => {
+    if (typeof count === 'number') return count;
+    if (!count) return 0;
+    const lowerCaseStr = count.toLowerCase();
     if (lowerCaseStr.endsWith('k')) {
       return parseFloat(lowerCaseStr.slice(0, -1)) * 1000;
     }
@@ -70,38 +74,52 @@ const formatCount = (count: number): string => {
     return count.toString();
 };
 
-export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(parseCount(post.stats.likes));
+export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  
+  const likesCount = useMemo(() => Object.keys(post.likes || {}).length, [post.likes]);
+  const isLiked = useMemo(() => currentUser && post.likes && post.likes[currentUser.id], [currentUser, post.likes]);
 
   const handleLike = () => {
-    if (isLiked) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
-    }
-    setIsLiked(!isLiked);
+    onLikePost(post.id);
   };
   
-  const handleComment = () => {
+  const handleToggleComments = () => {
     setShowComments(!showComments);
   };
 
   const handleShare = () => {
     alert('Share functionality is not yet implemented.');
   };
+  
+  const handleCommentSubmit = () => {
+    if (commentText.trim()) {
+      onAddComment(post.id, commentText);
+      setCommentText('');
+    }
+  };
+
 
   const isPublisher = post.user.id === currentUser.id;
-  const viewsCount = parseCount(post.stats.views);
+  const viewsCount = parseCount(post.views);
   
   let revenue = 0;
   if (isPublisher) {
       if (viewsCount > 1000 && viewsCount < 2000) {
           revenue = 25;
       }
-      // Future revenue logic can be added here
   }
+  
+  const timeAgo = useMemo(() => {
+    if (!post.createdAt) return 'Just now';
+    return formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
+  }, [post.createdAt]);
+
+  const sortedComments = useMemo(() => {
+    return post.comments ? Object.values(post.comments).sort((a, b) => a.createdAt - b.createdAt) : [];
+  }, [post.comments]);
+
 
   return (
     <Card>
@@ -115,7 +133,7 @@ export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
           </Avatar>
           <div className="flex-1">
             <p className="font-bold text-foreground">{post.user.name}</p>
-            <p className="text-xs text-muted-foreground">Published · Just now</p>
+            <p className="text-xs text-muted-foreground">Published · {timeAgo}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -132,15 +150,15 @@ export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem disabled>
                 <Eye className="mr-2 h-4 w-4" />
-                <span>{post.stats.views} Views</span>
+                <span>{formatCount(viewsCount)} Views</span>
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <ThumbsUp className="mr-2 h-4 w-4" />
-                <span>{formatCount(likes)} Likes</span>
+                <span>{formatCount(likesCount)} Likes</span>
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <MessageSquare className="mr-2 h-4 w-4" />
-                <span>{post.stats.comments} Comments</span>
+                <span>{formatCount(sortedComments.length)} Comments</span>
               </DropdownMenuItem>
               {isPublisher && revenue > 0 && (
                  <DropdownMenuItem disabled className="text-green-500">
@@ -178,15 +196,15 @@ export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
       <div className="flex justify-between items-center text-xs text-muted-foreground p-2 px-4">
         <div className="flex items-center gap-1">
           <ThumbsUp className="h-3 w-3 text-primary" />
-          <span>{formatCount(likes)}</span>
+          <span>{formatCount(likesCount)}</span>
         </div>
         <div className="flex gap-4">
-          <button onClick={handleComment} className="hover:underline">
-            {post.stats.comments} Comments
+          <button onClick={handleToggleComments} className="hover:underline">
+            {formatCount(sortedComments.length)} Comments
           </button>
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4" />
-            <span>{post.stats.views}</span>
+            <span>{formatCount(viewsCount)}</span>
           </div>
           {isPublisher && revenue > 0 && (
              <div className="flex items-center gap-1 text-green-500">
@@ -201,7 +219,7 @@ export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
           <Button variant="ghost" className={cn("flex-1 gap-2 font-semibold", isLiked ? "text-primary" : "text-muted-foreground")} onClick={handleLike}>
             <ThumbsUp className="h-5 w-5" /> Like
           </Button>
-          <Button variant="ghost" className="flex-1 gap-2 text-muted-foreground font-semibold" onClick={handleComment}>
+          <Button variant="ghost" className="flex-1 gap-2 text-muted-foreground font-semibold" onClick={handleToggleComments}>
             <MessageSquare className="h-5 w-5" /> Comment
           </Button>
           <Button variant="ghost" className="flex-1 gap-2 text-muted-foreground font-semibold" onClick={handleShare}>
@@ -212,15 +230,21 @@ export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
             <div className="w-full p-4 pt-2">
                 <Separator className="mb-4" />
                 <h4 className="text-sm font-semibold mb-2">Comments</h4>
-                <div className="space-y-3">
-                    {post.comments.length > 0 ? (
-                        post.comments.map((comment) => (
+                <div className="space-y-3 mb-4">
+                    {sortedComments.length > 0 ? (
+                        sortedComments.map((comment) => (
                             <div key={comment.id} className="flex items-start gap-2 text-xs">
                                 <Avatar className="h-6 w-6">
+                                    <AvatarImage src={comment.user.avatar} />
                                     <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <div className="bg-secondary rounded-lg p-2">
-                                    <p className="font-bold">{comment.user.name}</p>
+                                <div className="bg-secondary rounded-lg p-2 w-full">
+                                    <div className="flex justify-between">
+                                      <p className="font-bold">{comment.user.name}</p>
+                                      <p className="text-muted-foreground text-xs">
+                                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                      </p>
+                                    </div>
                                     <p>{comment.text}</p>
                                 </div>
                             </div>
@@ -228,6 +252,24 @@ export function PostCard({ post, currentUser, onDeletePost }: PostCardProps) {
                     ) : (
                         <p className="text-xs text-muted-foreground">No comments yet.</p>
                     )}
+                </div>
+                 <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={currentUser.avatar} />
+                      <AvatarFallback>
+                        {currentUser.avatar ? currentUser.name.charAt(0) : <UraIcon className="h-5 w-5" />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Input 
+                      placeholder="Write a comment..."
+                      className="bg-secondary border-none focus-visible:ring-0"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
+                    />
+                    <Button size="icon" onClick={handleCommentSubmit} disabled={!commentText.trim()}>
+                      <Send className="h-4 w-4" />
+                    </Button>
                 </div>
             </div>
         )}
