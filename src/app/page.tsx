@@ -81,7 +81,7 @@ export default function HomePage() {
           const postsList: Post[] = Object.keys(data).map(key => ({
             id: key,
             ...data[key]
-          })).sort((a, b) => b.createdAt - a.createdAt);
+          })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
           setPosts(postsList);
         } else {
           // Seed the database if it's empty

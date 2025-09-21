@@ -55,17 +55,9 @@ interface PostCardProps {
   onReportPost: (postId: string, reason: string) => void;
 }
 
-const parseCount = (count: number | string): number => {
+const parseCount = (count: number | undefined): number => {
     if (typeof count === 'number') return count;
-    if (!count) return 0;
-    const lowerCaseStr = count.toLowerCase();
-    if (lowerCaseStr.endsWith('k')) {
-      return parseFloat(lowerCaseStr.slice(0, -1)) * 1000;
-    }
-    if (lowerCaseStr.endsWith('m')) {
-      return parseFloat(lowerCaseStr.slice(0, -1)) * 1000000;
-    }
-    return parseInt(lowerCaseStr.replace(/,/g, ''), 10) || 0;
+    return 0;
 };
 
 const formatCount = (count: number): string => {
@@ -130,9 +122,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   
   let revenue = 0;
   if (isPublisher) {
-      if (viewsCount > 1000 && viewsCount <= 2000) {
-          revenue = 25;
-      }
+      revenue = (viewsCount / 1000) * 25;
   }
   
   const timeAgo = useMemo(() => {
