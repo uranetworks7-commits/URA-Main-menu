@@ -265,7 +265,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                                     <div className="flex justify-between">
                                       <p className="font-bold">{comment.user.name}</p>
                                       <p className="text-muted-foreground text-xs">
-                                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                        {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true }) : 'just now'}
                                       </p>
                                     </div>
                                     <p>{comment.text}</p>
