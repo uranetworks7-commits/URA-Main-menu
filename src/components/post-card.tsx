@@ -21,6 +21,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { ReportDialog } from './report-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { DeletePostDialog } from './delete-post-dialog';
+
 
 export interface Withdrawal {
   username: string;
@@ -94,6 +96,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -213,6 +216,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const showStats = secondsSinceCreation >= 60;
 
   return (
+    <>
     <Card>
       <CardHeader className="p-4">
         <div className="flex items-center gap-3">
@@ -280,7 +284,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                   </DropdownMenuItem>
                 )}
                 {isPublisher && (
-                    <DropdownMenuItem onClick={() => onDeletePost(post.id)} className="text-destructive">
+                    <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />
                       <span>Delete Post</span>
                     </DropdownMenuItem>
@@ -404,7 +408,13 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
         )}
       </CardFooter>
     </Card>
+     {isPublisher && (
+        <DeletePostDialog
+          isOpen={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onConfirm={() => onDeletePost(post.id)}
+        />
+      )}
+    </>
   );
 }
-
-    
