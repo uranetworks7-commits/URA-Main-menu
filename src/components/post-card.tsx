@@ -72,6 +72,7 @@ interface PostCardProps {
   onLikePost: (postId: string) => void;
   onAddComment: (postId: string, commentText: string) => void;
   onReportPost: (postId: string, reason: string) => void;
+  onViewPost: (postId: string) => void;
 }
 
 const parseCount = (count: number | undefined): number => {
@@ -89,7 +90,7 @@ const formatCount = (count: number): string => {
     return count.toString();
 };
 
-export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onReportPost }: PostCardProps) {
+export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onReportPost, onViewPost }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -112,22 +113,27 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   useEffect(() => {
     if (!post.createdAt) return;
 
+    const updateDisplayTime = () => {
+        if (post.createdAt) {
+           try {
+            setTimeAgo(formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }));
+           } catch(e) {
+            setTimeAgo('just now');
+           }
+        }
+    };
+    
     const secondsSinceCreation = (Date.now() - post.createdAt) / 1000;
+
     if (secondsSinceCreation < 15) {
       const timer = setTimeout(() => {
-        if (post.createdAt) {
-          setTimeAgo(formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }));
-        }
+         updateDisplayTime();
       }, (15 - secondsSinceCreation) * 1000);
       return () => clearTimeout(timer);
     }
     
-    // Force re-render every 15 seconds to update timeAgo
-    const interval = setInterval(() => {
-        if (post.createdAt) {
-            setTimeAgo(formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }));
-        }
-    }, 15000);
+    updateDisplayTime();
+    const interval = setInterval(updateDisplayTime, 15000); // Update every 15 seconds
     return () => clearInterval(interval);
 
   }, [post.createdAt]);
@@ -288,11 +294,11 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           </ReportDialog>
         </div>
       </CardHeader>
-      <CardContent className="px-4 pt-0 pb-2">
+      <CardContent className="px-4 pt-0 pb-2 cursor-pointer" onClick={() => onViewPost(post.id)}>
         <p>{post.content}</p>
       </CardContent>
       {post.image && (
-        <div className="relative w-full aspect-video bg-card">
+        <div className="relative w-full aspect-video bg-card cursor-pointer" onClick={() => onViewPost(post.id)}>
            <Image 
             src={post.image} 
             alt="Post image" 
@@ -303,7 +309,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
         </div>
       )}
        {post.video && (
-          <div className="w-full bg-black">
+          <div className="w-full bg-black cursor-pointer" onClick={() => onViewPost(post.id)}>
               <video
                   src={post.video}
                   controls
@@ -400,3 +406,5 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     </Card>
   );
 }
+
+    

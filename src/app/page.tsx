@@ -170,7 +170,7 @@ export default function HomePage() {
     useEffect(() => {
         if (!isClient || posts.length === 0) return;
 
-        const intervalTime = 5000; // Check every 5 seconds
+        const intervalTime = 5000; 
         const interval = setInterval(() => {
             const now = Date.now();
             posts.forEach(post => {
@@ -225,21 +225,24 @@ export default function HomePage() {
     let targetViews: number;
     const rand = Math.random();
 
-    if (rand < 0.01) { // 1%
-        viewStage = 'E'; // Viral
-        targetViews = Math.floor(Math.random() * (1500 - 150 + 1)) + 150;
-    } else if (rand < 0.06) { // 5%
-        viewStage = 'D';
-        targetViews = Math.floor(Math.random() * (150 - 78 + 1)) + 78;
-    } else if (rand < 0.16) { // 10%
-        viewStage = 'C';
-        targetViews = Math.floor(Math.random() * (78 - 28 + 1)) + 28;
-    } else if (rand < 0.41) { // 25%
-        viewStage = 'B';
-        targetViews = Math.floor(Math.random() * (28 - 10 + 1)) + 10;
-    } else { // 59%
+    if (rand < 0.12) { // 12%
         viewStage = 'A';
         targetViews = Math.floor(Math.random() * 5) + 1;
+    } else if (rand < 0.37) { // 25% (12 + 25)
+        viewStage = 'B';
+        targetViews = Math.floor(Math.random() * (28 - 10 + 1)) + 10;
+    } else if (rand < 0.47) { // 10% (37 + 10)
+        viewStage = 'C';
+        targetViews = Math.floor(Math.random() * (78 - 28 + 1)) + 28;
+    } else if (rand < 0.52) { // 5% (47 + 5)
+        viewStage = 'D';
+        targetViews = Math.floor(Math.random() * (150 - 78 + 1)) + 78;
+    } else if (rand < 0.53) { // 1% (52 + 1)
+        viewStage = 'E'; // Viral
+        targetViews = Math.floor(Math.random() * (1500 - 150 + 1)) + 150;
+    } else { // Remaining 47% - default to Stage B as a common case
+        viewStage = 'B';
+        targetViews = Math.floor(Math.random() * (28 - 10 + 1)) + 10;
     }
 
     const newPostData: Omit<Post, 'id'> = {
@@ -328,6 +331,25 @@ export default function HomePage() {
       createdAt: Date.now(),
     };
     set(newCommentRef, newComment);
+  };
+
+  const handleViewPost = (postId: string) => {
+    if (!currentUser || !isClient) return;
+
+    const viewedPostsKey = `viewedPosts_${currentUser.id}`;
+    const viewedPosts = JSON.parse(localStorage.getItem(viewedPostsKey) || '[]');
+
+    if (!viewedPosts.includes(postId)) {
+      const postRef = ref(db, `posts/${postId}`);
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        const currentViews = post.views || 0;
+        update(postRef, { views: currentViews + 1 });
+        
+        viewedPosts.push(postId);
+        localStorage.setItem(viewedPostsKey, JSON.stringify(viewedPosts));
+      }
+    }
   };
 
 
@@ -446,6 +468,7 @@ export default function HomePage() {
                     onLikePost={handleLikePost}
                     onAddComment={handleAddComment}
                     onReportPost={handleReportPost}
+                    onViewPost={handleViewPost}
                 />
               ))}
             </div>
@@ -455,5 +478,7 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
 
     
