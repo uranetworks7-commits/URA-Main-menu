@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, BarChart } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -251,7 +251,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                 <DropdownMenuSeparator />
                 {isPublisher && (
                    <DropdownMenuItem onClick={() => router.push('/analytics')}>
-                    <BarChart className="mr-2 h-4 w-4" />
+                    <PenSquare className="mr-2 h-4 w-4" />
                     <span>View Analytics</span>
                   </DropdownMenuItem>
                 )}

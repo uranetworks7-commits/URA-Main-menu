@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, BarChart } from 'lucide-react';
+import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
@@ -60,7 +60,7 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
       <div className="flex items-center gap-2">
         <Link href="/analytics">
           <Button variant="ghost" size="icon" className="rounded-full bg-secondary hover:bg-muted">
-            <BarChart className="h-5 w-5" />
+            <PenSquare className="h-5 w-5" />
           </Button>
         </Link>
         {currentUser && (
