@@ -58,6 +58,11 @@ export interface Post {
   comments: { [key: string]: Comment };
   views: number;
   createdAt: number;
+  // New fields for the stage system
+  viewStage?: 'A' | 'B' | 'C' | 'D' | 'E';
+  targetViews?: number;
+  stageAssignedAt?: number;
+  targetCompletedIn?: number; // hours
 }
 
 interface PostCardProps {
@@ -105,13 +110,20 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   });
 
   useEffect(() => {
-    const secondsSinceCreation = (Date.now() - post.createdAt) / 1000;
+    const secondsSinceCreation = (Date.now() - (post.createdAt || Date.now())) / 1000;
     if (secondsSinceCreation < 15) {
       const timer = setTimeout(() => {
         setTimeAgo(formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }));
       }, (15 - secondsSinceCreation) * 1000);
       return () => clearTimeout(timer);
     }
+    
+    // Force re-render every 15 seconds to update timeAgo
+    const interval = setInterval(() => {
+        setTimeAgo(formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }));
+    }, 15000);
+    return () => clearInterval(interval);
+
   }, [post.createdAt]);
 
   

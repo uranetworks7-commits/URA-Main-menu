@@ -166,46 +166,47 @@ export default function HomePage() {
 
     }, [posts, currentUser]);
   
-  // Automatic view increase simulation
-  useEffect(() => {
-    if (!isClient || posts.length === 0) return;
+    // New stage-based view simulation
+    useEffect(() => {
+        if (!isClient || posts.length === 0) return;
 
-    const interval = setInterval(() => {
-        const thirtySecondsAgo = Date.now() - 30 * 1000;
-        
-        posts.forEach(post => {
-            if ((post.createdAt || 0) > thirtySecondsAgo) {
-                // Skip posts newer than 30 seconds
-                return;
-            }
+        const intervalTime = 5000; // Check every 5 seconds
+        const interval = setInterval(() => {
+            const now = Date.now();
+            posts.forEach(post => {
+                if (post.viewStage && post.stageAssignedAt && post.targetViews && post.targetCompletedIn) {
+                    const durationMs = post.targetCompletedIn * 60 * 60 * 1000;
+                    const elapsedMs = now - post.stageAssignedAt;
+                    const currentViews = post.views || 0;
 
-            const currentViews = post.views || 0;
-            const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
-            let newViews = currentViews;
+                    if (elapsedMs < durationMs) {
+                        // Growth phase
+                        const progress = elapsedMs / durationMs;
+                        const expectedViews = Math.floor(progress * post.targetViews);
+                        
+                        if (currentViews < expectedViews) {
+                             update(ref(db, `posts/${post.id}`), { views: Math.min(expectedViews, post.targetViews) });
+                        }
 
-            if ((post.createdAt || 0) > fiveDaysAgo) {
-                // For posts newer than 5 days
-                // 5% chance for a viral burst of 100-350 views
-                if (Math.random() < 0.05) {
-                    newViews += Math.floor(Math.random() * 251) + 100; // 100 to 350
-                } else {
-                    // Otherwise, add 1-25 views
-                    newViews += Math.floor(Math.random() * 25) + 1;
+                    } else {
+                        // "Dead" phase after target time is completed
+                        if (currentViews < post.targetViews) {
+                             // Final update to ensure target is met
+                             update(ref(db, `posts/${post.id}`), { views: post.targetViews });
+                        } else {
+                            // Small chance to get a few more views
+                             if (Math.random() < 0.1) { // 10% chance every 5 seconds
+                                const newViews = currentViews + Math.floor(Math.random() * 3) + 1; // 1-3 views
+                                update(ref(db, `posts/${post.id}`), { views: newViews });
+                             }
+                        }
+                    }
                 }
-            } else {
-                // For posts older than 5 days, add 1-3 views
-                newViews += Math.floor(Math.random() * 3) + 1;
-            }
-            
-            // Cap views at 2000 and update if changed
-            if (newViews > currentViews) {
-                update(ref(db, `posts/${post.id}`), { views: Math.min(newViews, 2000) });
-            }
-        });
-    }, 1000 * 60 * 60); // Update every hour
+            });
+        }, intervalTime);
 
-    return () => clearInterval(interval);
-  }, [isClient, posts]);
+        return () => clearInterval(interval);
+    }, [isClient, posts]);
 
   const handleCreatePost = (content: string, mediaType?: 'image' | 'video', mediaUrl?: string) => {
     if (!currentUser) return;
@@ -220,13 +221,38 @@ export default function HomePage() {
       return;
     }
 
+    let viewStage: 'A' | 'B' | 'C' | 'D' | 'E';
+    let targetViews: number;
+    const rand = Math.random();
+
+    if (rand < 0.01) { // 1%
+        viewStage = 'E'; // Viral
+        targetViews = Math.floor(Math.random() * (1500 - 150 + 1)) + 150;
+    } else if (rand < 0.06) { // 5%
+        viewStage = 'D';
+        targetViews = Math.floor(Math.random() * (150 - 78 + 1)) + 78;
+    } else if (rand < 0.16) { // 10%
+        viewStage = 'C';
+        targetViews = Math.floor(Math.random() * (78 - 28 + 1)) + 28;
+    } else if (rand < 0.41) { // 25%
+        viewStage = 'B';
+        targetViews = Math.floor(Math.random() * (28 - 10 + 1)) + 10;
+    } else { // 59%
+        viewStage = 'A';
+        targetViews = Math.floor(Math.random() * 5) + 1;
+    }
+
     const newPostData: Omit<Post, 'id'> = {
       user: currentUser,
       content,
       likes: {},
       comments: {},
-      views: Math.floor(Math.random() * 16),
+      views: 0,
       createdAt: Date.now(),
+      viewStage,
+      targetViews,
+      stageAssignedAt: Date.now(),
+      targetCompletedIn: Math.floor(Math.random() * 48) + 1, // Random duration from 1 to 48 hours
     };
 
     if (mediaType === 'image' && mediaUrl) {
