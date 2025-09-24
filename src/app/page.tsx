@@ -65,6 +65,7 @@ export default function HomePage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [viewedPosts, setViewedPosts] = useState<string[]>([]);
 
 
   useEffect(() => {
@@ -86,6 +87,11 @@ export default function HomePage() {
                 localStorage.setItem('currentUser', JSON.stringify(userData));
             }
         });
+        
+        const viewedPostsKey = `viewedPosts_${user.id}`;
+        const storedViewedPosts = JSON.parse(localStorage.getItem(viewedPostsKey) || '[]');
+        setViewedPosts(storedViewedPosts);
+
       }
 
       const postsRef = ref(db, 'posts');
@@ -327,17 +333,18 @@ export default function HomePage() {
     if (!currentUser || !isClient) return;
 
     const viewedPostsKey = `viewedPosts_${currentUser.id}`;
-    const viewedPosts = JSON.parse(localStorage.getItem(viewedPostsKey) || '[]');
+    let currentViewedPosts: string[] = JSON.parse(localStorage.getItem(viewedPostsKey) || '[]');
 
-    if (!viewedPosts.includes(postId)) {
+    if (!currentViewedPosts.includes(postId)) {
       const postRef = ref(db, `posts/${postId}`);
       const post = posts.find(p => p.id === postId);
       if (post) {
         const currentViews = post.views || 0;
         update(postRef, { views: currentViews + 1 });
         
-        viewedPosts.push(postId);
-        localStorage.setItem(viewedPostsKey, JSON.stringify(viewedPosts));
+        currentViewedPosts.push(postId);
+        localStorage.setItem(viewedPostsKey, JSON.stringify(currentViewedPosts));
+        setViewedPosts(currentViewedPosts); // Update state to trigger re-render and re-sort
       }
     }
   };
@@ -399,13 +406,25 @@ export default function HomePage() {
   }, [posts, currentUser]);
 
   const filteredPosts = useMemo(() => {
-    if (!searchQuery) {
-      return posts;
-    }
-    return posts.filter(post =>
-      post.user.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [posts, searchQuery]);
+    const filtered = searchQuery
+      ? posts.filter(post =>
+          post.user.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : posts;
+
+    return [...filtered].sort((a, b) => {
+      const aIsViewed = viewedPosts.includes(a.id);
+      const bIsViewed = viewedPosts.includes(b.id);
+
+      if (aIsViewed === bIsViewed) {
+        // Both are viewed or both are unviewed, sort by newest first
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      }
+      
+      // Unviewed posts come first
+      return aIsViewed ? 1 : -1;
+    });
+  }, [posts, searchQuery, viewedPosts]);
 
 
   if (!isClient || isLoading) {
@@ -469,7 +488,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    
-
-    
