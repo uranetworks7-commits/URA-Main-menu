@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare } from 'lucide-react';
+import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare, BarChart, ThumbsUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
@@ -58,6 +58,23 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
         </Button>
       </nav>
       <div className="flex items-center gap-2">
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full bg-secondary hover:bg-muted">
+                    <BarChart className="h-5 w-5 text-yellow-500" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Dashboard</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <Link href="/liked">
+                    <DropdownMenuItem>
+                        <ThumbsUp className="mr-2 h-4 w-4" />
+                        <span>View Liked Posts</span>
+                    </DropdownMenuItem>
+                </Link>
+            </DropdownMenuContent>
+        </DropdownMenu>
         <Link href="/analytics">
           <Button variant="ghost" size="icon" className="rounded-full bg-secondary hover:bg-muted">
             <PenSquare className="h-5 w-5" />
