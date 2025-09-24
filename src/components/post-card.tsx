@@ -78,6 +78,7 @@ interface PostCardProps {
   onDeletePost: (postId: string) => void;
   onLikePost: (postId: string) => void;
   onAddComment: (postId: string, commentText: string) => void;
+  onDeleteComment: (postId: string, commentId: string) => void;
   onReportPost: (postId: string, reason: string) => void;
   onViewPost: (postId: string) => void;
 }
@@ -97,7 +98,38 @@ const formatCount = (count: number): string => {
     return count.toString();
 };
 
-export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onReportPost, onViewPost }: PostCardProps) {
+function CommentOptionsMenu({ comment, post, currentUser, onDelete }: { comment: Comment; post: Post; currentUser: User; onDelete: () => void }) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const canDelete = currentUser.id === post.user.id || currentUser.id === comment.user.id;
+
+  if (!canDelete) return null;
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-6 w-6">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <DeletePostDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={onDelete}
+      />
+    </>
+  );
+}
+
+
+export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onDeleteComment, onReportPost, onViewPost }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -223,7 +255,8 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   
   const sortedComments = useMemo(() => {
     if (!post.comments) return [];
-    return Object.values(post.comments)
+    return Object.entries(post.comments)
+      .map(([id, comment]) => ({ ...comment, id }))
       .sort((a, b) => a.createdAt - b.createdAt);
   }, [post.comments]);
 
@@ -381,18 +414,26 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                 <h4 className="text-sm font-semibold mb-2">Comments</h4>
                 <div className="space-y-3 mb-4">
                     {sortedComments.length > 0 ? (
-                        sortedComments.map((comment, index) => (
-                            <div key={index} className="flex items-start gap-2 text-xs">
+                        sortedComments.map((comment) => (
+                            <div key={comment.id} className="flex items-start gap-2 text-xs">
                                 <Avatar className="h-6 w-6">
                                     <AvatarImage src={comment.user.avatar} />
                                     <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div className="bg-secondary rounded-lg p-2 w-full">
-                                    <div className="flex justify-between">
-                                      <p className="font-bold">{comment.user.name}</p>
-                                      <p className="text-muted-foreground text-xs">
-                                        {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true }) : 'just now'}
-                                      </p>
+                                    <div className="flex justify-between items-center">
+                                      <div className="flex items-center gap-2">
+                                        <p className="font-bold">{comment.user.name}</p>
+                                        <p className="text-muted-foreground text-xs">
+                                          {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true }) : 'just now'}
+                                        </p>
+                                      </div>
+                                      <CommentOptionsMenu 
+                                        comment={comment}
+                                        post={post}
+                                        currentUser={currentUser}
+                                        onDelete={() => onDeleteComment(post.id, comment.id)}
+                                      />
                                     </div>
                                     <p>{comment.text}</p>
                                 </div>
@@ -434,5 +475,3 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     </>
   );
 }
-
-    

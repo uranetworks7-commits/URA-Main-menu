@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,12 @@ export function DeletePostDialog({ isOpen, onOpenChange, onConfirm }: DeletePost
     onOpenChange(false);
     setConfirmationText('');
   };
+  
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmationText('');
+    }
+  }, [isOpen]);
 
   const isConfirmationCorrect = confirmationText.toLowerCase() === 'delete';
 
@@ -35,22 +41,24 @@ export function DeletePostDialog({ isOpen, onOpenChange, onConfirm }: DeletePost
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure you want to delete this post?</AlertDialogTitle>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your post and remove its data from our servers.
+            This action cannot be undone. This will permanently delete this item.
+            To confirm, type "delete" below.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="grid gap-2 py-4">
-          <Label htmlFor="delete-confirm">To confirm, type "delete" below</Label>
+          <Label htmlFor="delete-confirm">Confirmation</Label>
           <Input
             id="delete-confirm"
             value={confirmationText}
             onChange={(e) => setConfirmationText(e.target.value)}
             placeholder="delete"
+            autoFocus
           />
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setConfirmationText('')}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={!isConfirmationCorrect}

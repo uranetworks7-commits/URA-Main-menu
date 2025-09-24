@@ -332,6 +332,12 @@ export default function HomePage() {
     };
     set(newCommentRef, newComment);
   };
+  
+  const handleDeleteComment = (postId: string, commentId: string) => {
+    if (!currentUser) return;
+    const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
+    remove(commentRef);
+  };
 
   const handleViewPost = (postId: string) => {
     if (!currentUser || !isClient) return;
@@ -509,6 +515,7 @@ export default function HomePage() {
                     onDeletePost={handleDeletePost}
                     onLikePost={handleLikePost}
                     onAddComment={handleAddComment}
+                    onDeleteComment={handleDeleteComment}
                     onReportPost={handleReportPost}
                     onViewPost={handleViewPost}
                 />
