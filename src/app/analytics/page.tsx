@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
   
   const userPosts = useMemo(() => {
     if (!currentUser) return [];
-    return posts.filter(post => post.user.id === currentUser.id);
+    return posts.filter(post => post.user && post.user.id === currentUser.id);
   }, [posts, currentUser]);
 
   const totalViews = useMemo(() => {
