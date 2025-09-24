@@ -352,12 +352,19 @@ export default function HomePage() {
 
   const handleUpdateProfile = (name: string, avatarUrl: string) => {
     if (!currentUser) return;
-    
-    // Update user in Firebase DB
-    const userRef = ref(db, `users/${currentUser.id}`);
-    update(userRef, { name, avatar: avatarUrl });
 
-    // No need to call setCurrentUser here, onValue listener will do it.
+    const updates: { [key: string]: any } = {};
+    updates[`/users/${currentUser.id}/name`] = name;
+    updates[`/users/${currentUser.id}/avatar`] = avatarUrl;
+    
+    posts.forEach(post => {
+      if (post.user.id === currentUser.id) {
+        updates[`/posts/${post.id}/user/name`] = name;
+        updates[`/posts/${post.id}/user/avatar`] = avatarUrl;
+      }
+    });
+
+    update(ref(db), updates);
     
     toast({
       title: "Profile Updated",
