@@ -128,7 +128,7 @@ export default function HomePage() {
         if (!currentUser || posts.length === 0) return;
 
         const interval = setInterval(() => {
-            const userPosts = posts.filter(p => p.user.id === currentUser.id);
+            const userPosts = posts.filter(p => p.user && p.user.id === currentUser.id);
             const totalViews = userPosts.reduce((acc, post) => acc + (post.views || 0), 0);
             const totalLikes = userPosts.reduce((acc, post) => acc + Object.keys(post.likes || {}).length, 0);
             
@@ -377,15 +377,6 @@ export default function HomePage() {
   };
 
  const handleLogin = async (name: string, mainAccountUsername: string) => {
-    if (!name && !mainAccountUsername) {
-        toast({
-            title: "Login Failed",
-            description: "Please provide a username or a main account username.",
-            variant: "destructive",
-        });
-        return;
-    }
-
     const usersRef = ref(db, 'users');
     const snapshot = await get(usersRef);
 
@@ -394,43 +385,40 @@ export default function HomePage() {
         let foundUser = null;
         let foundUserId = null;
 
+        // Iterate over all users to find a match
         for (const userId in usersData) {
             const user = usersData[userId];
-            let match = false;
+            
             if (mainAccountUsername && user.mainAccountUsername === mainAccountUsername) {
+                // If a main account username is provided, we prioritize it.
+                // If a chat name is also provided, we make sure it matches.
                 if (name && user.name !== name) {
-                     toast({
-                        title: "Login Failed",
-                        description: "The username and main account username do not match.",
-                        variant: "destructive",
-                    });
-                    return;
+                    continue; // Skip if chat name doesn't match
                 }
-                match = true;
+                foundUser = user;
+                foundUserId = userId;
+                break;
             } else if (name && !mainAccountUsername && user.name === name) {
-                match = true;
-            }
-
-            if (match) {
+                // Login with only chat name if main account is not provided
                 foundUser = user;
                 foundUserId = userId;
                 break;
             }
         }
-
+        
         if (foundUser && foundUserId) {
             const userToLogin = { id: foundUserId, ...foundUser };
             localStorage.setItem('currentUser', JSON.stringify(userToLogin));
             setCurrentUser(userToLogin);
         } else {
-            toast({
+             toast({
                 title: "Login Failed",
-                description: "No account found with the provided credentials.",
+                description: "No account found with the provided credentials. Please check your details and try again.",
                 variant: "destructive",
             });
         }
     } else {
-        toast({
+         toast({
             title: "Login Failed",
             description: "No users found in the database.",
             variant: "destructive",
@@ -445,7 +433,7 @@ export default function HomePage() {
   
   const userPosts = useMemo(() => {
     if (!currentUser) return [];
-    return posts.filter(post => post.user.id === currentUser.id);
+    return posts.filter(post => post.user && post.user.id === currentUser.id);
   }, [posts, currentUser]);
 
   const filteredPosts = useMemo(() => {
