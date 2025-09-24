@@ -344,7 +344,7 @@ export default function HomePage() {
         
         currentViewedPosts.push(postId);
         localStorage.setItem(viewedPostsKey, JSON.stringify(currentViewedPosts));
-        setViewedPosts(currentViewedPosts); // Update state to trigger re-render and re-sort
+        // We do not call setViewedPosts here to avoid immediate re-sorting
       }
     }
   };
