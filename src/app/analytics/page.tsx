@@ -23,6 +23,8 @@ export default function AnalyticsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
+  const [showAllPosts, setShowAllPosts] = useState(false);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -62,6 +64,13 @@ export default function AnalyticsPage() {
     if (!currentUser) return [];
     return posts.filter(post => post && post.user && post.user.id === currentUser.id);
   }, [posts, currentUser]);
+
+  const displayedPosts = useMemo(() => {
+    if (showAllPosts || userPosts.length <= 3) {
+      return userPosts;
+    }
+    return userPosts.slice(0, 3);
+  }, [userPosts, showAllPosts]);
 
   const totalViews = useMemo(() => {
     return userPosts.reduce((acc, post) => acc + (post.views || 0), 0);
@@ -226,7 +235,7 @@ export default function AnalyticsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {userPosts.map(post => {
+                            {displayedPosts.map(post => {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
                                 
@@ -276,6 +285,16 @@ export default function AnalyticsPage() {
                             })}
                         </TableBody>
                     </Table>
+                    {userPosts.length > 3 && (
+                        <div className="text-center mt-4">
+                            <Button
+                                variant="link"
+                                onClick={() => setShowAllPosts(!showAllPosts)}
+                            >
+                                {showAllPosts ? 'View Less' : 'View More'}
+                            </Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -332,5 +351,3 @@ export default function AnalyticsPage() {
     </>
   );
 }
-
-    
