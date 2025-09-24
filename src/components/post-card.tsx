@@ -309,7 +309,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
         </div>
       </CardHeader>
       <CardContent className="px-4 pt-0 pb-2 cursor-pointer" onClick={() => onViewPost(post.id)}>
-        <p>{post.content}</p>
+        <p className="break-words">{post.content}</p>
       </CardContent>
       {post.image && (
         <div className="relative w-full aspect-video bg-card cursor-pointer" onClick={() => onViewPost(post.id)}>
