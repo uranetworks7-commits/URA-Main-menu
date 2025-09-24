@@ -212,7 +212,13 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
 
   let revenue = 0;
   if (post.user.isMonetized) {
-      revenue = (viewsCount / 1250) * 25;
+      if(post.video) {
+        revenue = (viewsCount / 1250) * 25;
+      } else if (post.image) {
+        revenue = (viewsCount / 1250) * 15;
+      } else {
+        revenue = (viewsCount / 1250) * 10;
+      }
   }
   
   const sortedComments = useMemo(() => {
@@ -308,8 +314,8 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           </ReportDialog>
         </div>
       </CardHeader>
-      <CardContent className="px-4 pt-0 pb-2 cursor-pointer" onClick={() => onViewPost(post.id)}>
-        <p className="break-words">{post.content}</p>
+      <CardContent className="px-4 pt-0 pb-2 cursor-pointer break-words" onClick={() => onViewPost(post.id)}>
+        <p>{post.content}</p>
       </CardContent>
       {post.image && (
         <div className="relative w-full aspect-video bg-card cursor-pointer" onClick={() => onViewPost(post.id)}>
@@ -428,3 +434,5 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     </>
   );
 }
+
+    

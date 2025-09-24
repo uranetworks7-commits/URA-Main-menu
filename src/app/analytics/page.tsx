@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
   
   const userPosts = useMemo(() => {
     if (!currentUser) return [];
-    return posts.filter(post => post.user && post.user.id === currentUser.id);
+    return posts.filter(post => post && post.user && post.user.id === currentUser.id);
   }, [posts, currentUser]);
 
   const totalViews = useMemo(() => {
@@ -68,6 +68,7 @@ export default function AnalyticsPage() {
   }, [userPosts]);
   
   const totalLikes = useMemo(() => {
+      if (!userPosts) return 0;
       return userPosts.reduce((acc, post) => acc + Object.keys(post.likes || {}).length, 0);
   }, [userPosts]);
 
@@ -98,7 +99,14 @@ export default function AnalyticsPage() {
       if (!currentUser?.isMonetized) return 0;
       return userPosts.reduce((total, post) => {
         const views = post.views || 0;
-        const postRevenue = (views / 1250) * 25;
+        let postRevenue = 0;
+        if(post.video) {
+            postRevenue = (views / 1250) * 25;
+        } else if (post.image) {
+            postRevenue = (views / 1250) * 15;
+        } else {
+            postRevenue = (views / 1250) * 10;
+        }
         return total + postRevenue;
     }, 0);
   }, [userPosts, currentUser?.isMonetized]);
@@ -221,7 +229,18 @@ export default function AnalyticsPage() {
                             {userPosts.map(post => {
                                 const views = post.views || 0;
                                 const likes = Object.keys(post.likes || {}).length;
-                                const revenue = currentUser.isMonetized ? (views / 1250) * 25 : 0;
+                                
+                                let revenue = 0;
+                                if (currentUser.isMonetized) {
+                                    if(post.video) {
+                                        revenue = (views / 1250) * 25;
+                                    } else if (post.image) {
+                                        revenue = (views / 1250) * 15;
+                                    } else {
+                                        revenue = (views / 1250) * 10;
+                                    }
+                                }
+
                                 const isPostEligibleForMonetization = views > 1000 && likes >= 10;
 
                                 return (
@@ -313,3 +332,5 @@ export default function AnalyticsPage() {
     </>
   );
 }
+
+    

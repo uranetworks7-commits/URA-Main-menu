@@ -55,9 +55,16 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
   const totalRevenue = useMemo(() => {
     if (!currentUser?.isMonetized || !userPosts) return 0;
     return userPosts.reduce((total, post) => {
-        if (!post.user) return total; // Safety check
+        if (!post || !post.user) return total;
         const views = post.views || 0;
-        const postRevenue = (views / 1250) * 25;
+        let postRevenue = 0;
+        if(post.video) {
+            postRevenue = (views / 1250) * 25;
+        } else if (post.image) {
+            postRevenue = (views / 1250) * 15;
+        } else {
+            postRevenue = (views / 1250) * 10;
+        }
         return total + postRevenue;
     }, 0);
   }, [userPosts, currentUser?.isMonetized]);
@@ -148,3 +155,5 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
     </aside>
   );
 }
+
+    
