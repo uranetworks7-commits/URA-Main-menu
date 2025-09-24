@@ -63,9 +63,17 @@ export default function AnalyticsPage() {
     return posts.filter(post => post.user.id === currentUser.id);
   }, [posts, currentUser]);
 
-  const canBeMonetized = useMemo(() => {
-      return userPosts.some(post => (post.views || 0) > 1000 && Object.keys(post.likes || {}).length >= 10);
+  const totalViews = useMemo(() => {
+    return userPosts.reduce((acc, post) => acc + (post.views || 0), 0);
   }, [userPosts]);
+  
+  const totalLikes = useMemo(() => {
+      return userPosts.reduce((acc, post) => acc + Object.keys(post.likes || {}).length, 0);
+  }, [userPosts]);
+
+  const canBeMonetized = useMemo(() => {
+      return totalViews >= 2000 && totalLikes >= 25;
+  }, [totalViews, totalLikes]);
 
   const handleRequestMonetization = () => {
     if (!currentUser) return;
@@ -80,7 +88,7 @@ export default function AnalyticsPage() {
     } else {
       toast({
         title: "Monetization Requirements Not Met",
-        description: "You need at least one post with over 1,000 views and 10 likes.",
+        description: "You need at least 2,000 total views and 25 total likes across all your posts.",
         variant: "destructive",
       });
     }
@@ -106,15 +114,6 @@ export default function AnalyticsPage() {
     if (!currentUser?.withdrawals) return [];
     return Object.values(currentUser.withdrawals).sort((a, b) => b.timestamp - a.timestamp);
   }, [currentUser?.withdrawals]);
-
-
-  const totalViews = useMemo(() => {
-    return userPosts.reduce((acc, post) => acc + (post.views || 0), 0);
-  }, [userPosts]);
-  
-  const totalLikes = useMemo(() => {
-      return userPosts.reduce((acc, post) => acc + Object.keys(post.likes || {}).length, 0);
-  }, [userPosts]);
 
 
   if (!isClient || !currentUser) {
@@ -240,7 +239,7 @@ export default function AnalyticsPage() {
                                                     <Badge variant="secondary" className="text-xs">No Earnings</Badge>
                                                 )
                                             ) : (
-                                                isPostEligibleForMonetization ? (
+                                                canBeMonetized ? (
                                                      <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
                                                         Eligible
                                                     </Badge>
