@@ -160,6 +160,7 @@ export default function HomePage() {
         const interval = setInterval(() => {
             const now = Date.now();
             posts.forEach(post => {
+                if (!post.user) return; // Safety check
                 if (post.viewStage && post.stageAssignedAt && post.targetViews && post.targetCompletedIn) {
                     const durationMs = post.targetCompletedIn * 60 * 60 * 1000;
                     const elapsedMs = now - post.stageAssignedAt;

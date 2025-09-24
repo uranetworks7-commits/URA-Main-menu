@@ -55,6 +55,7 @@ export function LeftSidebar({ currentUser, onLogout, onUpdateProfile, userPosts 
   const totalRevenue = useMemo(() => {
     if (!currentUser?.isMonetized || !userPosts) return 0;
     return userPosts.reduce((total, post) => {
+        if (!post.user) return total; // Safety check
         const views = post.views || 0;
         const postRevenue = (views / 1250) * 25;
         return total + postRevenue;
