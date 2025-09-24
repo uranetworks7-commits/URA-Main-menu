@@ -108,8 +108,14 @@ export default function AnalyticsPage() {
   }, [currentUser?.withdrawals]);
 
 
-  const totalViews = currentUser?.totalViews || 0;
-  const totalLikes = currentUser?.totalLikes || 0;
+  const totalViews = useMemo(() => {
+    return userPosts.reduce((acc, post) => acc + (post.views || 0), 0);
+  }, [userPosts]);
+  
+  const totalLikes = useMemo(() => {
+      return userPosts.reduce((acc, post) => acc + Object.keys(post.likes || {}).length, 0);
+  }, [userPosts]);
+
 
   if (!isClient || !currentUser) {
     return null; // or a loading spinner
