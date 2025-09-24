@@ -439,7 +439,7 @@ export default function HomePage() {
   const filteredPosts = useMemo(() => {
     const filtered = searchQuery
       ? posts.filter(post =>
-          post.user.name.toLowerCase().includes(searchQuery.toLowerCase())
+          post.user && post.user.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
       : posts;
 

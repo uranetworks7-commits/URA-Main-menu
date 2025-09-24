@@ -105,6 +105,11 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const { toast } = useToast();
   const router = useRouter();
 
+  // If post or post.user is missing, don't render the card.
+  if (!post || !post.user) {
+    return null;
+  }
+
   const [timeAgo, setTimeAgo] = useState(() => {
     if (!post.createdAt) return 'just now';
     const secondsSinceCreation = (Date.now() - post.createdAt) / 1000;
