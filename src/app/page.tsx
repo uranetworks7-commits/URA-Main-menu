@@ -362,7 +362,7 @@ export default function HomePage() {
     updates[`/users/${currentUser.id}/avatar`] = avatarUrl;
     
     posts.forEach(post => {
-      if (post.user.id === currentUser.id) {
+      if (post.user && post.user.id === currentUser.id) {
         updates[`/posts/${post.id}/user/name`] = name;
         updates[`/posts/${post.id}/user/avatar`] = avatarUrl;
       }
