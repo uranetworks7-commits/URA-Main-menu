@@ -84,7 +84,12 @@ export default function HomePage() {
             const userData = snapshot.val();
             if (userData) {
                 setCurrentUser(userData);
-                localStorage.setItem('currentUser', JSON.stringify(userData));
+                // We don't want to overwrite the localStorage here immediately,
+                // as it might contain fresh data from other tabs.
+                // Instead, we only update if the data is materially different.
+                if (JSON.stringify(userData) !== savedUser) {
+                   localStorage.setItem('currentUser', JSON.stringify(userData));
+                }
             }
         });
         
@@ -208,24 +213,21 @@ export default function HomePage() {
     let targetViews: number;
     const rand = Math.random();
 
-    if (rand < 0.12) { // 12%
-        viewStage = 'A';
-        targetViews = Math.floor(Math.random() * 5) + 1;
-    } else if (rand < 0.37) { // 25% (12 + 25)
-        viewStage = 'B';
-        targetViews = Math.floor(Math.random() * (28 - 10 + 1)) + 10;
-    } else if (rand < 0.47) { // 10% (37 + 10)
-        viewStage = 'C';
-        targetViews = Math.floor(Math.random() * (78 - 28 + 1)) + 28;
-    } else if (rand < 0.52) { // 5% (47 + 5)
-        viewStage = 'D';
-        targetViews = Math.floor(Math.random() * (150 - 78 + 1)) + 78;
-    } else if (rand < 0.53) { // 1% (52 + 1)
+    if (rand < 0.04) { // 4% for Stage E
         viewStage = 'E'; // Viral
         targetViews = Math.floor(Math.random() * (1500 - 150 + 1)) + 150;
-    } else { // Remaining 47% - default to Stage B as a common case
+    } else if (rand < 0.22) { // 18% for Stage D (4 + 18 = 22)
+        viewStage = 'D';
+        targetViews = Math.floor(Math.random() * (150 - 78 + 1)) + 78;
+    } else if (rand < 0.37) { // 15% for Stage B (22 + 15 = 37)
         viewStage = 'B';
         targetViews = Math.floor(Math.random() * (28 - 10 + 1)) + 10;
+    } else if (rand < 0.47) { // 10% for Stage A (37 + 10 = 47)
+        viewStage = 'A';
+        targetViews = Math.floor(Math.random() * 5) + 1;
+    } else { // 53% for Stage C (the rest)
+        viewStage = 'C';
+        targetViews = Math.floor(Math.random() * (78 - 28 + 1)) + 28;
     }
 
     const newPostData: Omit<Post, 'id'> = {
@@ -344,7 +346,8 @@ export default function HomePage() {
         
         currentViewedPosts.push(postId);
         localStorage.setItem(viewedPostsKey, JSON.stringify(currentViewedPosts));
-        // We do not call setViewedPosts here to avoid immediate re-sorting
+        // We do not call setViewedPosts here to keep the feed stable during the session.
+        // The state will be updated on the next page load.
       }
     }
   };
