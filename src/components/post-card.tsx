@@ -69,6 +69,7 @@ export interface Post {
   targetViews?: number;
   stageAssignedAt?: number;
   targetCompletedIn?: number; // hours
+  finalViewBoostApplied?: boolean;
 }
 
 interface PostCardProps {

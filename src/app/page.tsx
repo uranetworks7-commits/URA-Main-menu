@@ -179,12 +179,13 @@ export default function HomePage() {
                         if (currentViews < post.targetViews) {
                              // Final update to ensure target is met
                              update(ref(db, `posts/${post.id}`), { views: post.targetViews });
-                        } else {
-                            // Small chance to get a few more views
-                             if (Math.random() < 0.1) { // 10% chance every 5 seconds
-                                const newViews = currentViews + Math.floor(Math.random() * 3) + 1; // 1-3 views
-                                update(ref(db, `posts/${post.id}`), { views: newViews });
-                             }
+                        } else if (!post.finalViewBoostApplied) {
+                            // One-time final boost
+                            const finalViews = currentViews + Math.floor(Math.random() * 2) + 2; // 2-3 views
+                            update(ref(db, `posts/${post.id}`), { 
+                                views: finalViews,
+                                finalViewBoostApplied: true 
+                            });
                         }
                     }
                 }
@@ -377,29 +378,44 @@ export default function HomePage() {
 
  const handleLogin = async (name: string, mainAccountUsername: string) => {
     const usersRef = ref(db, 'users');
-    const q = query(usersRef, orderByChild('name'), equalTo(name));
-    const snapshot = await get(q);
+    let q;
 
-    if (snapshot.exists()) {
-      const userData = snapshot.val();
-      const userId = Object.keys(userData)[0];
-      const existingUser = { id: userId, ...userData[userId] };
-      
-      // Check if main account username matches
-      if (existingUser.mainAccountUsername === mainAccountUsername) {
-        localStorage.setItem('currentUser', JSON.stringify(existingUser));
-        setCurrentUser(existingUser);
-      } else {
-         toast({
-            title: "Login Failed",
-            description: "The main account username is incorrect.",
-            variant: "destructive",
-        });
-      }
+    if (mainAccountUsername && !name) {
+      q = query(usersRef, orderByChild('mainAccountUsername'), equalTo(mainAccountUsername));
+    } else if (name) {
+      q = query(usersRef, orderByChild('name'), equalTo(name));
     } else {
         toast({
             title: "Login Failed",
-            description: "No account with that name exists. Account creation is disabled.",
+            description: "Please provide a username or main account username.",
+            variant: "destructive",
+        });
+        return;
+    }
+
+    const snapshot = await get(q);
+
+    if (snapshot.exists()) {
+      const usersData = snapshot.val();
+      const userId = Object.keys(usersData)[0];
+      const user = { id: userId, ...usersData[userId] };
+
+      if (mainAccountUsername && name && user.mainAccountUsername !== mainAccountUsername) {
+          toast({
+              title: "Login Failed",
+              description: "The username and main account username do not match.",
+              variant: "destructive",
+          });
+          return;
+      }
+
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      setCurrentUser(user);
+
+    } else {
+        toast({
+            title: "Login Failed",
+            description: "No account found with the provided credentials.",
             variant: "destructive",
         });
     }
