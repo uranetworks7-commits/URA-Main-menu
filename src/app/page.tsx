@@ -73,31 +73,6 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
   
-  const getTodayPostCount = useCallback(() => {
-    if (!currentUser) return 0;
-    const today = new Date().toISOString().split('T')[0];
-    const key = `postCount_${currentUser.id}_${today}`;
-    return parseInt(localStorage.getItem(key) || '0', 10);
-  }, [currentUser]);
-
-  const incrementTodayPostCount = useCallback(() => {
-    if (!currentUser) return;
-    const today = new Date().toISOString().split('T')[0];
-    const key = `postCount_${currentUser.id}_${today}`;
-    const count = getTodayPostCount();
-    localStorage.setItem(key, (count + 1).toString());
-  }, [currentUser, getTodayPostCount]);
-
-  const decrementTodayPostCount = useCallback(() => {
-    if (!currentUser) return;
-    const today = new Date().toISOString().split('T')[0];
-    const key = `postCount_${currentUser.id}_${today}`;
-    let count = getTodayPostCount();
-    count = Math.max(0, count - 1);
-    localStorage.setItem(key, count.toString());
-  }, [currentUser, getTodayPostCount]);
-
-
   useEffect(() => {
     if (isClient) {
       const savedUser = localStorage.getItem('currentUser');
@@ -211,14 +186,16 @@ export default function HomePage() {
   const handleCreatePost = (content: string, mediaType?: 'image' | 'video', mediaUrl?: string) => {
     if (!currentUser) return;
     
-    const postCount = getTodayPostCount();
-    if (postCount >= 2) {
-      toast({
-        title: "Post Limit Reached",
-        description: "You can only create up to 2 posts per day.",
-        variant: "destructive",
-      });
-      return;
+    const today = new Date().toISOString().split('T')[0];
+    const userPostCount = currentUser.dailyPostCount?.date === today ? currentUser.dailyPostCount.count : 0;
+
+    if (userPostCount >= 2) {
+        toast({
+            title: "Post Limit Reached",
+            description: "You can only create up to 2 posts per day.",
+            variant: "destructive",
+        });
+        return;
     }
 
     let viewStage: 'A' | 'B' | 'C' | 'D' | 'E';
@@ -266,7 +243,14 @@ export default function HomePage() {
     
     const newPostRef = push(ref(db, 'posts'));
     set(newPostRef, newPostData);
-    incrementTodayPostCount();
+
+    const userRef = ref(db, `users/${currentUser.id}`);
+    update(userRef, {
+        dailyPostCount: {
+            count: userPostCount + 1,
+            date: today,
+        }
+    });
   };
   
   const handleDeletePost = (postId: string) => {
@@ -280,18 +264,24 @@ export default function HomePage() {
     const likesLost = Object.keys(postToDelete.likes || {}).length;
     
     const userRef = ref(db, `users/${currentUser.id}`);
-    const updates: Partial<User> = {
+    const updates: any = { // Use 'any' to dynamically add properties
         totalViews: Math.max(0, (currentUser.totalViews || 0) - viewsLost),
         totalLikes: Math.max(0, (currentUser.totalLikes || 0) - likesLost),
     };
+
+    // Decrement daily post count if the post was created today
+    const today = new Date().toISOString().split('T')[0];
+    const postCreationDate = new Date(postToDelete.createdAt).toISOString().split('T')[0];
+    if (postCreationDate === today && currentUser.dailyPostCount?.date === today) {
+        updates['dailyPostCount/count'] = Math.max(0, currentUser.dailyPostCount.count - 1);
+    }
+
     update(userRef, updates);
+
 
     // Remove post from DB
     const postRef = ref(db, `posts/${postId}`);
     remove(postRef);
-    
-    // Decrement daily post count
-    decrementTodayPostCount();
   };
   
   const handleReportPost = (postId: string, reason: string) => {
@@ -426,7 +416,8 @@ export default function HomePage() {
     return <LoginPage onLogin={handleLogin} />;
   }
   
-  const postCountToday = getTodayPostCount();
+  const today = new Date().toISOString().split('T')[0];
+  const postCountToday = currentUser.dailyPostCount?.date === today ? currentUser.dailyPostCount.count : 0;
 
   return (
     <div className="flex flex-col h-screen">

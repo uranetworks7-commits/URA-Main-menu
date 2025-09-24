@@ -41,6 +41,10 @@ export interface User {
   totalViews?: number;
   totalLikes?: number;
   withdrawals?: { [key: string]: Withdrawal };
+  dailyPostCount?: {
+      count: number;
+      date: string;
+  };
 }
 export interface Comment {
     id: string;
@@ -114,7 +118,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   });
 
   useEffect(() => {
-    if (!post.createdAt) return;
+    if (!post.createdAt || typeof post.createdAt !== 'number') return;
 
     const updateDisplayTime = () => {
         if (post.createdAt) {
