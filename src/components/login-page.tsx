@@ -18,8 +18,8 @@ const formSchema = z.object({
   name: z.string().optional(),
   mainAccountUsername: z.string().optional(),
 }).refine(data => data.name || data.mainAccountUsername, {
-    message: "Either Username or Main Account Username must be filled in.",
-    path: ["name"], // you can use any field name here
+    message: "Either Main Account Username or Chat Name must be filled in.",
+    path: ["mainAccountUsername"], 
 });
 
 
@@ -70,7 +70,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Username <span className="text-yellow-500">(optional)</span></FormLabel>
+                    <FormLabel>Your Chat Name <span className="text-yellow-500">(optional)</span></FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. JohnDoe" {...field} />
                     </FormControl>
