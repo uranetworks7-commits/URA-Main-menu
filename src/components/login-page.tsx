@@ -52,12 +52,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="name"
+                name="mainAccountUsername"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Username <span className="text-yellow-500">(optional)</span></FormLabel>
+                    <FormLabel>
+                        <span className="text-red-500">Main Account</span> Username
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. JohnDoe" {...field} />
+                      <Input placeholder="e.g. MainAccount" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -65,14 +67,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               />
               <FormField
                 control={form.control}
-                name="mainAccountUsername"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                        <span className="text-yellow-500">Main Account</span> Username
-                    </FormLabel>
+                    <FormLabel>Your Username <span className="text-yellow-500">(optional)</span></FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. MainAccount" {...field} />
+                      <Input placeholder="e.g. JohnDoe" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
