@@ -377,45 +377,62 @@ export default function HomePage() {
   };
 
  const handleLogin = async (name: string, mainAccountUsername: string) => {
-    const usersRef = ref(db, 'users');
-    let q;
-
-    if (mainAccountUsername && !name) {
-      q = query(usersRef, orderByChild('mainAccountUsername'), equalTo(mainAccountUsername));
-    } else if (name) {
-      q = query(usersRef, orderByChild('name'), equalTo(name));
-    } else {
+    if (!name && !mainAccountUsername) {
         toast({
             title: "Login Failed",
-            description: "Please provide a username or main account username.",
+            description: "Please provide a username or a main account username.",
             variant: "destructive",
         });
         return;
     }
 
-    const snapshot = await get(q);
+    const usersRef = ref(db, 'users');
+    const snapshot = await get(usersRef);
 
     if (snapshot.exists()) {
-      const usersData = snapshot.val();
-      const userId = Object.keys(usersData)[0];
-      const user = { id: userId, ...usersData[userId] };
+        const usersData = snapshot.val();
+        let foundUser = null;
+        let foundUserId = null;
 
-      if (mainAccountUsername && name && user.mainAccountUsername !== mainAccountUsername) {
-          toast({
-              title: "Login Failed",
-              description: "The username and main account username do not match.",
-              variant: "destructive",
-          });
-          return;
-      }
+        for (const userId in usersData) {
+            const user = usersData[userId];
+            let match = false;
+            if (mainAccountUsername && user.mainAccountUsername === mainAccountUsername) {
+                if (name && user.name !== name) {
+                     toast({
+                        title: "Login Failed",
+                        description: "The username and main account username do not match.",
+                        variant: "destructive",
+                    });
+                    return;
+                }
+                match = true;
+            } else if (name && !mainAccountUsername && user.name === name) {
+                match = true;
+            }
 
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      setCurrentUser(user);
+            if (match) {
+                foundUser = user;
+                foundUserId = userId;
+                break;
+            }
+        }
 
+        if (foundUser && foundUserId) {
+            const userToLogin = { id: foundUserId, ...foundUser };
+            localStorage.setItem('currentUser', JSON.stringify(userToLogin));
+            setCurrentUser(userToLogin);
+        } else {
+            toast({
+                title: "Login Failed",
+                description: "No account found with the provided credentials.",
+                variant: "destructive",
+            });
+        }
     } else {
         toast({
             title: "Login Failed",
-            description: "No account found with the provided credentials.",
+            description: "No users found in the database.",
             variant: "destructive",
         });
     }

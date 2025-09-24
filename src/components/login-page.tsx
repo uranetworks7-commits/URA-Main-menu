@@ -15,12 +15,11 @@ interface LoginPageProps {
 }
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  mainAccountUsername: z.string().min(2, {
-    message: "Main account username must be at least 2 characters.",
-  }),
+  name: z.string().optional(),
+  mainAccountUsername: z.string().optional(),
+}).refine(data => data.name || data.mainAccountUsername, {
+    message: "Either Username or Main Account Username must be filled in.",
+    path: ["name"], // you can use any field name here
 });
 
 
@@ -34,7 +33,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onLogin(values.name, values.mainAccountUsername);
+    onLogin(values.name || '', values.mainAccountUsername || '');
   }
 
   return (
@@ -58,7 +57,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   <FormItem>
                     <FormLabel>Your Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. JohnDoe" {...field} />
+                      <Input placeholder="e.g. JohnDoe (optional)" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
