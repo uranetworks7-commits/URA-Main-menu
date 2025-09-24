@@ -55,9 +55,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Username</FormLabel>
+                    <FormLabel>Your Username <span className="text-yellow-500">(optional)</span></FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. JohnDoe (optional)" {...field} />
+                      <Input placeholder="e.g. JohnDoe" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -68,7 +68,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 name="mainAccountUsername"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Main Account Username</FormLabel>
+                    <FormLabel>
+                        <span className="text-yellow-500">Main Account</span> Username
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. MainAccount" {...field} />
                     </FormControl>
