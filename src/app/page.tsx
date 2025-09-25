@@ -464,22 +464,20 @@ export default function HomePage() {
                 return bPopularity - aPopularity;
             });
             break;
-        case 'newest':
-             sortedPosts.sort((a, b) => {
-                const aIsViewed = viewedPosts.includes(a.id);
-                const bIsViewed = viewedPosts.includes(b.id);
-                if (aIsViewed === bIsViewed) {
-                    return (b.createdAt || 0) - (a.createdAt || 0);
-                }
-                return aIsViewed ? 1 : -1;
-            });
-            break;
         case 'old':
             sortedPosts.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
             break;
         case 'feed':
+        case 'newest':
         default:
-             sortedPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+             sortedPosts.sort((a, b) => {
+                const aIsViewed = viewedPosts.includes(a.id);
+                const bIsViewed = viewedPosts.includes(b.id);
+                if (aIsViewed === bIsViewed) {
+                    return (b.createdAt || 0) - (a.createdAt || 0); // Both viewed or both not viewed, sort by newest
+                }
+                return aIsViewed ? 1 : -1; // Unviewed posts first
+            });
             break;
     }
 
