@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
-import { ref, onValue, update } from "firebase/database";
+import { ref, onValue, update, push, set } from "firebase/database";
 import type { User, Withdrawal } from '@/components/post-card';
 import { Header } from '@/components/header';
 import { LeftSidebar } from '@/components/left-sidebar';
@@ -13,14 +13,132 @@ import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Loader2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Loader2, ShieldCheck, UserPlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 const SECURITY_KEY = 'Utkarsh225';
 
 interface PendingWithdrawal extends Withdrawal {
     isClearing?: boolean;
     clearRedeemCode?: string;
+}
+
+const createUserSchema = z.object({
+  mainAccountUsername: z.string().min(3, "Main account username is required."),
+  name: z.string().min(3, "Chat name is required."),
+  avatar: z.string().url("Please enter a valid avatar URL."),
+});
+
+function CreateUserForm({ onAccountCreated }: { onAccountCreated: () => void }) {
+    const { toast } = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const form = useForm<z.infer<typeof createUserSchema>>({
+        resolver: zodResolver(createUserSchema),
+        defaultValues: {
+            mainAccountUsername: "",
+            name: "",
+            avatar: "",
+        },
+    });
+
+    async function onSubmit(values: z.infer<typeof createUserSchema>) {
+        setIsSubmitting(true);
+        try {
+            const usersRef = ref(db, 'users');
+            const newUserRef = push(usersRef);
+
+            const newUser: Omit<User, 'id'> = {
+                name: values.name,
+                mainAccountUsername: values.mainAccountUsername,
+                avatar: values.avatar,
+                isMonetized: false,
+                totalViews: 0,
+                totalLikes: 0,
+                dailyPostCount: { count: 0, date: '' },
+                withdrawals: {},
+            };
+            
+            await set(newUserRef, newUser);
+
+            toast({
+                title: "Account Created",
+                description: `User "${values.name}" has been successfully created.`,
+            });
+            form.reset();
+            onAccountCreated();
+        } catch (error) {
+            console.error("Failed to create account:", error);
+            toast({
+                title: "Error",
+                description: "Failed to create account. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    return (
+        <Card>
+            <CardHeader className="p-4">
+                <CardTitle className="text-lg flex items-center gap-2"><UserPlus />Create User Account</CardTitle>
+                <CardDescription className="text-xs">Create a new user profile on the platform.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="mainAccountUsername"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-xs">Main Account Username</FormLabel>
+                                    <FormControl>
+                                        <Input className="h-8 text-xs" placeholder="e.g. main_user" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-xs">Chat Name</FormLabel>
+                                    <FormControl>
+                                        <Input className="h-8 text-xs" placeholder="e.g. ChatUser" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="avatar"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-xs">Avatar URL</FormLabel>
+                                    <FormControl>
+                                        <Input className="h-8 text-xs" placeholder="https://example.com/avatar.png" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" size="sm" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
+                        </Button>
+                    </form>
+                </Form>
+            </CardContent>
+        </Card>
+    );
 }
 
 function AdminLogin({ onLoginSuccess }: { onLoginSuccess: () => void }) {
@@ -69,6 +187,7 @@ export default function PanAdsPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [userFetchKey, setUserFetchKey] = useState(0);
 
     useEffect(() => {
         const auth = localStorage.getItem('pan_ads_auth');
@@ -96,7 +215,7 @@ export default function PanAdsPage() {
                 setUsers(allUsers);
             }
         });
-    }, [isAuthenticated]);
+    }, [isAuthenticated, userFetchKey]);
 
     useEffect(() => {
         if (!users.length) return;
@@ -192,7 +311,8 @@ export default function PanAdsPage() {
                     onUpdateProfile={() => {}}
                     userPosts={[]}
                 />
-                <main className="flex-1 overflow-y-auto p-4">
+                <main className="flex-1 overflow-y-auto p-4 space-y-4">
+                     <CreateUserForm onAccountCreated={() => setUserFetchKey(k => k + 1)} />
                      <Card>
                         <CardHeader className="p-4">
                             <div className="flex items-center gap-2">

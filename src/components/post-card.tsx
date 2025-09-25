@@ -39,7 +39,7 @@ export interface User {
   id: string;
   name: string;
   avatar: string;
-  mainAccountUsername?: string;
+  mainAccountUsername: string;
   isMonetized?: boolean;
   totalViews?: number;
   totalLikes?: number;
