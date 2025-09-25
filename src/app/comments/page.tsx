@@ -145,16 +145,16 @@ export default function CommentsPage() {
             <CardContent className="p-4 pt-0">
               <Tabs defaultValue="on-your-posts">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="on-your-posts" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black">Comments on Your Posts</TabsTrigger>
-                  <TabsTrigger value="by-you" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black">Comments You've Made</TabsTrigger>
+                  <TabsTrigger value="on-your-posts" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black text-xs">Comments on Your Posts</TabsTrigger>
+                  <TabsTrigger value="by-you" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black text-xs">Comments You've Made</TabsTrigger>
                 </TabsList>
                 <TabsContent value="on-your-posts" className="mt-4">
                     {commentsOnMyPosts.length > 0 ? (
                         <div className="space-y-4">
                             {commentsOnMyPosts.map(comment => (
                                 <div key={comment.id} className="p-3 rounded-lg bg-secondary/50">
-                                    <p className="text-xs text-yellow-500 mb-2">
-                                      On post: <span className="italic text-muted-foreground">"{comment.postContent.substring(0, 50)}..."</span>
+                                    <p className="text-xs text-muted-foreground mb-2">
+                                      On post: <span className="italic">"{comment.postContent.substring(0, 50)}..."</span>
                                     </p>
                                     <div className="flex items-start gap-3">
                                         <Avatar className="h-8 w-8">
@@ -166,7 +166,7 @@ export default function CommentsPage() {
                                                 <span className="font-bold">{comment.user.name}</span>
                                                 <span className="text-muted-foreground">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
                                             </div>
-                                            <p className="text-sm">{comment.text}</p>
+                                            <p className="text-xs">{comment.text}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -183,8 +183,8 @@ export default function CommentsPage() {
                         <div className="space-y-4">
                             {commentsByMe.map(comment => (
                                 <div key={comment.id} className="p-3 rounded-lg bg-secondary/50">
-                                    <p className="text-xs text-yellow-500 mb-2">
-                                      You commented on a post: <span className="italic text-muted-foreground">"{comment.postContent.substring(0, 50)}..."</span>
+                                    <p className="text-xs text-muted-foreground mb-2">
+                                      You commented on a post: <span className="italic">"{comment.postContent.substring(0, 50)}..."</span>
                                     </p>
                                     <div className="flex items-start gap-3">
                                         <Avatar className="h-8 w-8">
@@ -196,7 +196,7 @@ export default function CommentsPage() {
                                                 <span className="font-bold">{comment.user.name} (You)</span>
                                                 <span className="text-muted-foreground">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
                                             </div>
-                                            <p className="text-sm">{comment.text}</p>
+                                            <p className="text-xs">{comment.text}</p>
                                         </div>
                                     </div>
                                 </div>
