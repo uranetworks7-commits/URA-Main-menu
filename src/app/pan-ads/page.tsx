@@ -192,35 +192,35 @@ export default function PanAdsPage() {
                     onUpdateProfile={() => {}}
                     userPosts={[]}
                 />
-                <main className="flex-1 overflow-y-auto p-6">
+                <main className="flex-1 overflow-y-auto p-4">
                      <Card>
-                        <CardHeader>
+                        <CardHeader className="p-4">
                             <div className="flex items-center gap-2">
                                  <Button variant="ghost" size="icon" onClick={() => router.back()}>
                                     <ArrowLeft className="h-5 w-5" />
                                 </Button>
                                 <div>
-                                    <CardTitle className="text-xl">Pan Ads - Withdrawal Requests</CardTitle>
-                                    <CardDescription>Review and process pending user withdrawals.</CardDescription>
+                                    <CardTitle className="text-lg">Pan Ads - Withdrawal Requests</CardTitle>
+                                    <CardDescription className="text-xs">Review and process pending user withdrawals.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-2">
                              <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>User</TableHead>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead className="text-right">Amount</TableHead>
-                                        <TableHead className="text-center">Action</TableHead>
+                                        <TableHead className="text-xs">User</TableHead>
+                                        <TableHead className="text-xs">Date</TableHead>
+                                        <TableHead className="text-right text-xs">Amount</TableHead>
+                                        <TableHead className="text-center text-xs">Action</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {pendingWithdrawals.length > 0 ? pendingWithdrawals.map(w => (
                                         <TableRow key={w.withdrawalId}>
-                                            <TableCell className="font-medium">{w.username}</TableCell>
-                                            <TableCell>{format(new Date(w.timestamp), 'dd MMM yy, h:mm a')}</TableCell>
-                                            <TableCell className="text-right font-bold">₹{w.totalDeducted.toFixed(2)}</TableCell>
+                                            <TableCell className="font-medium text-xs">{w.username}</TableCell>
+                                            <TableCell className="text-xs">{format(new Date(w.timestamp), 'dd MMM, h:mm a')}</TableCell>
+                                            <TableCell className="text-right font-bold text-xs">₹{w.totalDeducted.toFixed(2)}</TableCell>
                                             <TableCell className="text-center space-y-2">
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <Checkbox
@@ -228,25 +228,26 @@ export default function PanAdsPage() {
                                                         checked={w.isClearing}
                                                         onCheckedChange={() => handleClearToggle(w.withdrawalId)}
                                                     />
-                                                    <label htmlFor={`clear-${w.withdrawalId}`} className="text-sm font-medium leading-none">
-                                                        Clear Withdrawal
+                                                    <label htmlFor={`clear-${w.withdrawalId}`} className="text-xs font-medium leading-none">
+                                                        Clear
                                                     </label>
                                                 </div>
                                                 {w.isClearing && (
-                                                    <div className="flex items-center gap-2 pt-2">
+                                                    <div className="flex items-center gap-1 pt-2">
                                                         <Input
-                                                            placeholder="Enter redeem code"
+                                                            placeholder="Redeem code"
                                                             value={w.clearRedeemCode}
                                                             onChange={(e) => handleRedeemCodeChange(w.withdrawalId, e.target.value)}
+                                                            className="h-8 text-xs"
                                                         />
-                                                        <Button size="sm" onClick={() => handleSend(w)}>Send</Button>
+                                                        <Button size="sm" className="h-8" onClick={() => handleSend(w)}>Send</Button>
                                                     </div>
                                                 )}
                                             </TableCell>
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="text-center text-muted-foreground">
+                                            <TableCell colSpan={4} className="text-center text-muted-foreground text-xs py-8">
                                                 No pending withdrawals.
                                             </TableCell>
                                         </TableRow>
