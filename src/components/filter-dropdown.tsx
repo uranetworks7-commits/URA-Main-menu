@@ -3,6 +3,7 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
@@ -28,6 +29,7 @@ export function FilterDropdown({ value, onValueChange }: FilterDropdownProps) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={value} onValueChange={(v) => onValueChange(v as SortType)}>
                     <DropdownMenuRadioItem value="feed">Feed (Normal)</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="popular" className="text-green-500">Popular</DropdownMenuRadioItem>
