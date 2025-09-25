@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History, Search, ShieldCheck } from 'lucide-react';
+import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History, Search, ShieldCheck, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
@@ -141,6 +141,14 @@ export default function AnalyticsPage() {
   const handleViewDetails = (post: Post) => {
     setSelectedPost(post);
     setIsDetailsDialogOpen(true);
+  };
+  
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code).then(() => {
+        toast({ title: "Redeem code copied!" });
+    }).catch(err => {
+        toast({ title: "Failed to copy code", variant: "destructive" });
+    });
   };
 
 
@@ -344,7 +352,14 @@ export default function AnalyticsPage() {
                                     <TableRow key={index}>
                                         <TableCell className="text-xs">{format(new Date(withdrawal.timestamp), 'dd MMM yy, h:mm a')}</TableCell>
                                         <TableCell className="font-mono text-xs">
-                                            {withdrawal.status === 'cleared' ? withdrawal.redeemCode : 'N/A'}
+                                            <div className="flex items-center gap-2">
+                                                {withdrawal.status === 'cleared' ? withdrawal.redeemCode : 'N/A'}
+                                                {withdrawal.status === 'cleared' && withdrawal.redeemCode && (
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopyCode(withdrawal.redeemCode)}>
+                                                        <Copy className="h-3 w-3" />
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <Badge variant={withdrawal.status === 'cleared' ? 'default' : 'secondary'} className={withdrawal.status === 'cleared' ? 'bg-green-500' : 'bg-yellow-500'}>
