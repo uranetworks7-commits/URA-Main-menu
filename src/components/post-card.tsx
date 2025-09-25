@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, ShieldCheck } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -31,6 +31,9 @@ export interface Withdrawal {
   totalDeducted: number;
   redeemCode: string;
   timestamp: number;
+  status: 'pending' | 'cleared';
+  userId: string;
+  withdrawalId: string;
 }
 export interface User {
   id: string;

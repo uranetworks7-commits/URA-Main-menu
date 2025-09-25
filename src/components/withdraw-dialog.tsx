@@ -30,7 +30,6 @@ interface WithdrawDialogProps {
 
 const formSchema = z.object({
   amount: z.coerce.number().min(15, { message: "Withdrawal amount must be at least ₹15." }),
-  redeemCode: z.string().min(1, { message: "Redeem code is required." }),
 });
 
 export function WithdrawDialog({ 
@@ -45,8 +44,7 @@ export function WithdrawDialog({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: '' as any, // Initialize with empty string to avoid NaN error
-      redeemCode: "",
+      amount: '' as any,
     },
   });
 
@@ -56,7 +54,7 @@ export function WithdrawDialog({
 
   useEffect(() => {
     if (!isOpen) {
-      form.reset({ amount: '' as any, redeemCode: '' });
+      form.reset({ amount: '' as any });
       setIsSubmitting(false);
     }
   }, [isOpen, form]);
@@ -72,39 +70,41 @@ export function WithdrawDialog({
       setIsSubmitting(false);
       return;
     }
-    
-    // Simulate redeem code validation (always succeeds here)
-    // In a real app, this would be an API call.
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
+        const newWithdrawalRef = push(ref(db, `users/${currentUser.id}/withdrawals`));
+        const withdrawalId = newWithdrawalRef.key;
+        
+        if (!withdrawalId) {
+            throw new Error("Could not generate withdrawal ID");
+        }
+
         const withdrawalData = {
+            userId: currentUser.id,
+            withdrawalId: withdrawalId,
             username: currentUser.name,
             amount: values.amount,
             fee: fee,
             totalDeducted: totalDeducted,
-            redeemCode: values.redeemCode,
-            timestamp: Date.now()
+            redeemCode: '', // This will be set by the admin
+            timestamp: Date.now(),
+            status: 'pending' as const,
         };
-        
-        // This creates a unique key for the new withdrawal
-        const newWithdrawalKey = push(ref(db, `users/${currentUser.id}/withdrawals`)).key;
-        
-        const updates: { [key: string]: any } = {};
-        updates[`/users/${currentUser.id}/withdrawals/${newWithdrawalKey}`] = withdrawalData;
 
-        await update(ref(db), updates);
+        await update(ref(db), {
+            [`/users/${currentUser.id}/withdrawals/${withdrawalId}`]: withdrawalData
+        });
 
         toast({
-            title: "Withdrawal Successful",
-            description: `₹${values.amount.toFixed(2)} has been processed.`,
+            title: "Withdrawal Request Submitted",
+            description: `Your request for ₹${values.amount.toFixed(2)} is pending approval.`,
         });
         onOpenChange(false);
 
     } catch (error) {
-        console.error("Withdrawal failed:", error);
+        console.error("Withdrawal request failed:", error);
         toast({
-            title: "Withdrawal Failed",
+            title: "Request Failed",
             description: "Something went wrong. Please try again.",
             variant: "destructive"
         });
@@ -119,7 +119,7 @@ export function WithdrawDialog({
         <DialogHeader>
           <DialogTitle>Withdraw Funds</DialogTitle>
           <DialogDescription>
-            Enter the amount you wish to withdraw. A 33% transaction fee will be applied.
+            Enter the amount you wish to withdraw. Your request will be reviewed by an admin. A 33% transaction fee will be applied upon approval.
           </DialogDescription>
         </DialogHeader>
 
@@ -139,19 +139,6 @@ export function WithdrawDialog({
                                  onChange={e => field.onChange(e.target.value === '' ? '' : e.target.valueAsNumber)}
                                  value={field.value === undefined || field.value === null ? '' : field.value}
                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="redeemCode"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Redeem Code</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Enter your redeem code" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -179,12 +166,11 @@ export function WithdrawDialog({
                     </div>
                 )}
 
-
                 <DialogFooter>
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={isSubmitting}>Cancel</Button>
                     <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Withdraw
+                        Request Withdrawal
                     </Button>
                 </DialogFooter>
             </form>

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History, Search } from 'lucide-react';
+import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History, Search, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
@@ -126,7 +126,9 @@ export default function AnalyticsPage() {
 
   const totalWithdrawals = useMemo(() => {
     if (!currentUser?.withdrawals) return 0;
-    return Object.values(currentUser.withdrawals).reduce((acc, w) => acc + w.totalDeducted, 0);
+    return Object.values(currentUser.withdrawals)
+      .filter(w => w.status === 'cleared')
+      .reduce((acc, w) => acc + w.totalDeducted, 0);
   }, [currentUser?.withdrawals]);
   
   const availableBalance = useMemo(() => totalRevenue - totalWithdrawals, [totalRevenue, totalWithdrawals]);
@@ -320,7 +322,7 @@ export default function AnalyticsPage() {
                         <div className="flex items-center gap-2">
                              <History className="h-5 w-5" />
                             <div>
-                                <CardTitle className="text-xl">Redeemed History</CardTitle>
+                                <CardTitle className="text-xl">Withdrawal History</CardTitle>
                                 <CardDescription className="text-xs">A log of all your past withdrawals.</CardDescription>
                             </div>
                         </div>
@@ -331,6 +333,7 @@ export default function AnalyticsPage() {
                                 <TableRow>
                                     <TableHead className="text-xs">Date</TableHead>
                                     <TableHead className="text-xs">Redeem Code</TableHead>
+                                    <TableHead className="text-center text-xs">Status</TableHead>
                                     <TableHead className="text-right text-xs">Amount</TableHead>
                                     <TableHead className="text-right text-xs">Fee</TableHead>
                                     <TableHead className="text-right text-xs">Total Deducted</TableHead>
@@ -340,7 +343,14 @@ export default function AnalyticsPage() {
                                 {withdrawalHistory.map((withdrawal, index) => (
                                     <TableRow key={index}>
                                         <TableCell className="text-xs">{format(new Date(withdrawal.timestamp), 'dd MMM yy, h:mm a')}</TableCell>
-                                        <TableCell className="font-mono text-xs">...{withdrawal.redeemCode.slice(-4)}</TableCell>
+                                        <TableCell className="font-mono text-xs">
+                                            {withdrawal.status === 'cleared' ? withdrawal.redeemCode : 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <Badge variant={withdrawal.status === 'cleared' ? 'default' : 'secondary'} className={withdrawal.status === 'cleared' ? 'bg-green-500' : 'bg-yellow-500'}>
+                                                {withdrawal.status}
+                                            </Badge>
+                                        </TableCell>
                                         <TableCell className="text-right text-xs">₹{withdrawal.amount.toFixed(2)}</TableCell>
                                         <TableCell className="text-right text-destructive text-xs">₹{withdrawal.fee.toFixed(2)}</TableCell>
                                         <TableCell className="text-right font-bold text-xs">₹{withdrawal.totalDeducted.toFixed(2)}</TableCell>

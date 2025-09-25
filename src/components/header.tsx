@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare, BarChart, ThumbsUp, MessageSquare } from 'lucide-react';
+import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare, BarChart, ThumbsUp, MessageSquare, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
@@ -77,6 +77,13 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
                     <DropdownMenuItem>
                         <MessageSquare className="mr-2 h-4 w-4" />
                         <span>Your Comments</span>
+                    </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <Link href="/pan-ads">
+                    <DropdownMenuItem>
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        <span>Pan Ads</span>
                     </DropdownMenuItem>
                 </Link>
             </DropdownMenuContent>
