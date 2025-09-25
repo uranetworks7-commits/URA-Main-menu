@@ -254,8 +254,8 @@ export default function AnalyticsPage() {
 
                                 return (
                                     <TableRow key={post.id}>
-                                        <TableCell className="max-w-xs truncate font-medium text-xs">{post.content}</TableCell>
-                                        <TableCell className="text-xs">{format(new Date(post.createdAt), 'dd MMM yyyy')}</TableCell>
+                                        <TableCell className="max-w-[100px] md:max-w-xs truncate font-medium text-xs">{post.content}</TableCell>
+                                        <TableCell className="text-xs">{format(new Date(post.createdAt), 'dd MMM yy')}</TableCell>
                                         <TableCell className="text-center">
                                             {currentUser.isMonetized ? (
                                                 revenue > 0 ? (
@@ -323,7 +323,7 @@ export default function AnalyticsPage() {
                             <TableBody>
                                 {withdrawalHistory.map((withdrawal, index) => (
                                     <TableRow key={index}>
-                                        <TableCell className="text-xs">{format(new Date(withdrawal.timestamp), 'dd MMM yyyy, h:mm a')}</TableCell>
+                                        <TableCell className="text-xs">{format(new Date(withdrawal.timestamp), 'dd MMM yy, h:mm a')}</TableCell>
                                         <TableCell className="font-mono text-xs">...{withdrawal.redeemCode.slice(-4)}</TableCell>
                                         <TableCell className="text-right text-xs">₹{withdrawal.amount.toFixed(2)}</TableCell>
                                         <TableCell className="text-right text-destructive text-xs">₹{withdrawal.fee.toFixed(2)}</TableCell>
