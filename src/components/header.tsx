@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare, BarChart, ThumbsUp } from 'lucide-react';
+import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare, BarChart, ThumbsUp, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
@@ -71,6 +71,12 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
                     <DropdownMenuItem>
                         <ThumbsUp className="mr-2 h-4 w-4" />
                         <span>View Liked Posts</span>
+                    </DropdownMenuItem>
+                </Link>
+                <Link href="/comments">
+                    <DropdownMenuItem>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        <span>Your Comments</span>
                     </DropdownMenuItem>
                 </Link>
             </DropdownMenuContent>
