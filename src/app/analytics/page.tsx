@@ -127,7 +127,6 @@ export default function AnalyticsPage() {
   const totalWithdrawals = useMemo(() => {
     if (!currentUser?.withdrawals) return 0;
     return Object.values(currentUser.withdrawals)
-      .filter(w => w.status === 'cleared')
       .reduce((acc, w) => acc + w.totalDeducted, 0);
   }, [currentUser?.withdrawals]);
   
