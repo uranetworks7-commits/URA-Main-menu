@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { UraIcon } from '@/components/ura-icon';
+import { FilterDropdown, SortType } from '@/components/filter-dropdown';
 
 const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     {
@@ -66,6 +67,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [viewedPosts, setViewedPosts] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<SortType>('feed');
 
 
   useEffect(() => {
@@ -444,25 +446,45 @@ export default function HomePage() {
   }, [posts, currentUser]);
 
   const filteredPosts = useMemo(() => {
-    const filtered = searchQuery
-      ? posts.filter(post =>
-          post.user && post.user.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : posts;
+    let sortedPosts = [...posts];
 
-    return [...filtered].sort((a, b) => {
-      const aIsViewed = viewedPosts.includes(a.id);
-      const bIsViewed = viewedPosts.includes(b.id);
+    // 1. Search filter
+    if (searchQuery) {
+        sortedPosts = sortedPosts.filter(post =>
+            post.user && post.user.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }
+    
+    // 2. Sorting logic
+    switch (sortBy) {
+        case 'popular':
+            sortedPosts.sort((a, b) => {
+                const aPopularity = (a.views || 0) + Object.keys(a.likes || {}).length * 5;
+                const bPopularity = (b.views || 0) + Object.keys(b.likes || {}).length * 5;
+                return bPopularity - aPopularity;
+            });
+            break;
+        case 'newest':
+             sortedPosts.sort((a, b) => {
+                const aIsViewed = viewedPosts.includes(a.id);
+                const bIsViewed = viewedPosts.includes(b.id);
+                if (aIsViewed === bIsViewed) {
+                    return (b.createdAt || 0) - (a.createdAt || 0);
+                }
+                return aIsViewed ? 1 : -1;
+            });
+            break;
+        case 'old':
+            sortedPosts.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+            break;
+        case 'feed':
+        default:
+             sortedPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            break;
+    }
 
-      if (aIsViewed === bIsViewed) {
-        // Both are viewed or both are unviewed, sort by newest first
-        return (b.createdAt || 0) - (a.createdAt || 0);
-      }
-      
-      // Unviewed posts come first
-      return aIsViewed ? 1 : -1;
-    });
-  }, [posts, searchQuery, viewedPosts]);
+    return sortedPosts;
+}, [posts, searchQuery, sortBy, viewedPosts]);
 
 
   if (!isClient || isLoading) {
@@ -501,10 +523,11 @@ export default function HomePage() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search users..." 
-                className="pl-8 w-full bg-card" 
+                className="pl-8 pr-10 w-full bg-card" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              <FilterDropdown value={sortBy} onValueChange={setSortBy} />
             </div>
             <div className="space-y-4">
               {filteredPosts.map((post) => (
