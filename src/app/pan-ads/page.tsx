@@ -49,11 +49,13 @@ function CreateUserForm({ onAccountCreated }: { onAccountCreated: () => void }) 
     async function onSubmit(values: z.infer<typeof createUserSchema>) {
         setIsSubmitting(true);
         try {
-            const usersRef = ref(db, 'users');
-            const newUserRef = push(usersRef);
+            const formattedName = values.name.startsWith('@') ? values.name : `@${values.name}`;
+            const userId = `user-${formattedName.substring(1)}-${Date.now()}`;
+            const userRef = ref(db, `users/${userId}`);
 
-            const newUser: Omit<User, 'id'> = {
-                name: values.name,
+            const newUser: User = {
+                id: userId,
+                name: formattedName,
                 mainAccountUsername: values.mainAccountUsername,
                 avatar: values.avatar,
                 isMonetized: false,
@@ -63,7 +65,7 @@ function CreateUserForm({ onAccountCreated }: { onAccountCreated: () => void }) 
                 withdrawals: {},
             };
             
-            await set(newUserRef, newUser);
+            await set(userRef, newUser);
 
             toast({
                 title: "Account Created",
