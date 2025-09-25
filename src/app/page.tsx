@@ -59,6 +59,14 @@ function LoadingScreen() {
     )
 }
 
+const getISTDateString = () => {
+    const date = new Date();
+    // IST is UTC+5:30
+    const offset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(date.getTime() + offset);
+    return istDate.toISOString().split('T')[0];
+};
+
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -124,6 +132,25 @@ export default function HomePage() {
       });
     }
   }, [isClient]);
+
+  // Reset daily post count if the day has changed (IST)
+    useEffect(() => {
+        if (currentUser) {
+            const todayIST = getISTDateString();
+            const lastPostDate = currentUser.dailyPostCount?.date;
+
+            if (lastPostDate !== todayIST) {
+                const userRef = ref(db, `users/${currentUser.id}`);
+                update(userRef, {
+                    dailyPostCount: {
+                        count: 0,
+                        date: todayIST,
+                    }
+                });
+            }
+        }
+    }, [currentUser]);
+
 
   // Update user stats periodically
     useEffect(() => {
@@ -201,7 +228,7 @@ export default function HomePage() {
   const handleCreatePost = (content: string, mediaType?: 'image' | 'video', mediaUrl?: string) => {
     if (!currentUser) return;
     
-    const today = new Date().toISOString().split('T')[0];
+    const today = getISTDateString();
     const userPostCount = currentUser.dailyPostCount?.date === today ? currentUser.dailyPostCount.count : 0;
 
     if (userPostCount >= 2) {
@@ -282,9 +309,11 @@ export default function HomePage() {
     };
 
     // Decrement daily post count if the post was created today
-    const today = new Date().toISOString().split('T')[0];
-    const postCreationDate = new Date(postToDelete.createdAt).toISOString().split('T')[0];
-    if (postCreationDate === today && currentUser.dailyPostCount?.date === today) {
+    const today = getISTDateString();
+    const postCreationDate = new Date(postToDelete.createdAt).toISOString().split('T')[0]; // This can stay UTC as it's a past date
+    const postCreationDateIST = new Date(new Date(postToDelete.createdAt).getTime() + 5.5 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    if (postCreationDateIST === today && currentUser.dailyPostCount?.date === today) {
         updates['dailyPostCount/count'] = Math.max(0, currentUser.dailyPostCount.count - 1);
     }
 
@@ -493,7 +522,7 @@ export default function HomePage() {
     return <LoginPage onLogin={handleLogin} />;
   }
   
-  const today = new Date().toISOString().split('T')[0];
+  const today = getISTDateString();
   const postCountToday = currentUser.dailyPostCount?.date === today ? currentUser.dailyPostCount.count : 0;
 
   return (
