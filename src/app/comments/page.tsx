@@ -131,7 +131,7 @@ export default function CommentsPage() {
             <CardHeader className="p-4">
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-5 w-5 text-yellow-500" />
                 </Button>
                 <div>
                   <CardTitle className="text-xl flex items-center gap-2">
@@ -145,8 +145,8 @@ export default function CommentsPage() {
             <CardContent className="p-4 pt-0">
               <Tabs defaultValue="on-your-posts">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="on-your-posts">Comments on Your Posts</TabsTrigger>
-                  <TabsTrigger value="by-you">Comments You've Made</TabsTrigger>
+                  <TabsTrigger value="on-your-posts" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black">Comments on Your Posts</TabsTrigger>
+                  <TabsTrigger value="by-you" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black">Comments You've Made</TabsTrigger>
                 </TabsList>
                 <TabsContent value="on-your-posts" className="mt-4">
                     {commentsOnMyPosts.length > 0 ? (
