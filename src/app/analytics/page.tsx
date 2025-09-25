@@ -10,11 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History } from 'lucide-react';
+import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { WithdrawDialog } from '@/components/withdraw-dialog';
+import { PostDetailsDialog } from '@/components/post-details-dialog';
+
 
 export default function AnalyticsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -24,6 +26,8 @@ export default function AnalyticsPage() {
   const { toast } = useToast();
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
   const [showAllPosts, setShowAllPosts] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
 
 
   useEffect(() => {
@@ -131,6 +135,11 @@ export default function AnalyticsPage() {
     if (!currentUser?.withdrawals) return [];
     return Object.values(currentUser.withdrawals).sort((a, b) => b.timestamp - a.timestamp);
   }, [currentUser?.withdrawals]);
+  
+  const handleViewDetails = (post: Post) => {
+    setSelectedPost(post);
+    setIsDetailsDialogOpen(true);
+  };
 
 
   if (!isClient || !currentUser) {
@@ -232,6 +241,7 @@ export default function AnalyticsPage() {
                                 <TableHead className="text-right text-xs">Likes</TableHead>
                                 <TableHead className="text-right text-xs">Comments</TableHead>
                                 <TableHead className="text-right text-xs">Revenue</TableHead>
+                                <TableHead className="text-right text-xs">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -280,6 +290,12 @@ export default function AnalyticsPage() {
                                         <TableCell className="text-right text-xs">{likes.toLocaleString()}</TableCell>
                                         <TableCell className="text-right text-xs">{Object.keys(post.comments || {}).length.toLocaleString()}</TableCell>
                                         <TableCell className="text-right font-medium text-green-500 text-xs">₹{revenue.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right text-xs">
+                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(post)}>
+                                                <Search className="h-3 w-3 mr-1" />
+                                                Details
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 );
                             })}
@@ -346,6 +362,14 @@ export default function AnalyticsPage() {
           onOpenChange={setIsWithdrawDialogOpen}
           currentUser={currentUser}
           availableBalance={availableBalance}
+        />
+      )}
+      {selectedPost && (
+        <PostDetailsDialog
+          isOpen={isDetailsDialogOpen}
+          onOpenChange={setIsDetailsDialogOpen}
+          post={selectedPost}
+          currentUser={currentUser}
         />
       )}
     </>
