@@ -153,8 +153,8 @@ export default function CommentsPage() {
                         <div className="space-y-4">
                             {commentsOnMyPosts.map(comment => (
                                 <div key={comment.id} className="p-3 rounded-lg bg-secondary/50">
-                                    <p className="text-sm text-muted-foreground mb-2">
-                                      On post: <span className="italic">"{comment.postContent.substring(0, 50)}..."</span>
+                                    <p className="text-xs text-yellow-500 mb-2">
+                                      On post: <span className="italic text-muted-foreground">"{comment.postContent.substring(0, 50)}..."</span>
                                     </p>
                                     <div className="flex items-start gap-3">
                                         <Avatar className="h-8 w-8">
@@ -183,8 +183,8 @@ export default function CommentsPage() {
                         <div className="space-y-4">
                             {commentsByMe.map(comment => (
                                 <div key={comment.id} className="p-3 rounded-lg bg-secondary/50">
-                                    <p className="text-sm text-muted-foreground mb-2">
-                                      You commented on a post: <span className="italic">"{comment.postContent.substring(0, 50)}..."</span>
+                                    <p className="text-xs text-yellow-500 mb-2">
+                                      You commented on a post: <span className="italic text-muted-foreground">"{comment.postContent.substring(0, 50)}..."</span>
                                     </p>
                                     <div className="flex items-start gap-3">
                                         <Avatar className="h-8 w-8">
