@@ -11,6 +11,9 @@ import {
 import { CopyrightStrike } from '@/lib/types';
 import { Badge } from '../ui/badge';
 import { FileWarning } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { UraIcon } from '../ura-icon';
+import { formatDistanceToNow } from 'date-fns';
 
 interface StrikeContentDialogProps {
   isOpen: boolean;
@@ -31,9 +34,23 @@ export function StrikeContentDialog({ isOpen, onOpenChange, strike }: StrikeCont
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 rounded-lg border p-4">
+            <div className="flex items-center gap-3">
+              <Avatar>
+                {/* Since the original user might be deleted, we can't rely on their data. 
+                    Let's use a generic fallback. The claimant's name is what matters here. */}
+                <AvatarFallback>
+                    <UraIcon className="h-6 w-6" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <p className="font-bold text-foreground">Original Post Content</p>
+                <p className="text-xs text-muted-foreground">
+                    Strike received on {formatDistanceToNow(new Date(strike.receivedAt), { addSuffix: true })}
+                </p>
+              </div>
+            </div>
             
             <p className="text-sm bg-secondary p-3 rounded-md break-words">
-                <span className="font-bold text-muted-foreground">Post Text: </span>
                 {strike.postContent}
             </p>
 
