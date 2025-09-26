@@ -73,17 +73,17 @@ function CommentOptionsMenu({ comment, post, currentUser, onDelete }: { comment:
 
 
 export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onDeleteComment, onReportPost, onViewPost }: any) {
+  // If post or post.user is missing, don't render the card.
+  if (!post || !post.user) {
+    return null;
+  }
+  
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-
-  // If post or post.user is missing, don't render the card.
-  if (!post || !post.user) {
-    return null;
-  }
 
   const [timeAgo, setTimeAgo] = useState(() => {
     if (!post.createdAt) return 'just now';
@@ -435,3 +435,5 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     </>
   );
 }
+
+    
