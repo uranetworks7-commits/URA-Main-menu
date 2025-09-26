@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { MessageSquare, Undo2, Loader2 } from 'lucide-react';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { ref, update, remove } from 'firebase/database';
 import { db } from '@/lib/firebase';
 import {
@@ -191,4 +191,3 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
         </>
     );
 }
-
