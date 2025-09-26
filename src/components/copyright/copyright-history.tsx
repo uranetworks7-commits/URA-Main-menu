@@ -101,9 +101,9 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
             </CardHeader>
             <CardContent className="p-4 pt-0">
                 <Tabs defaultValue="strikes">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="strikes">Strikes Against You</TabsTrigger>
-                        <TabsTrigger value="claims">Claims You Submitted</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 h-9">
+                        <TabsTrigger value="strikes" className="text-xs h-full">Strikes Against You</TabsTrigger>
+                        <TabsTrigger value="claims" className="text-xs h-full">Claims You Submitted</TabsTrigger>
                     </TabsList>
                     <TabsContent value="strikes" className="mt-4">
                         <Table>
