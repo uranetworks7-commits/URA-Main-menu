@@ -100,7 +100,8 @@ export default function CopyrightAdminPage() {
             const claimPath = `/copyrightClaims/${claim.id}`;
             const accusedUserStrikePath = `/users/${claim.accusedUserId}/copyrightStrikes/${claim.id}`;
             const claimantSubmittedPath = `/users/${claim.claimantId}/submittedClaims/${claim.id}`;
-            const postRef = ref(db, `/posts/${claim.postId}`);
+            const postPath = `/posts/${claim.postId}`;
+            const postRef = ref(db, postPath);
 
             if (action === 'approve') {
                 const postSnapshot = await get(postRef);
@@ -115,8 +116,8 @@ export default function CopyrightAdminPage() {
                     strikeId: claim.id,
                     postId: claim.postId,
                     postContent: postData.content,
-                    imageUrl: postData.image || '',
-                    videoUrl: postData.video || '',
+                    imageUrl: postData.image || null,
+                    videoUrl: postData.video || null,
                     claimantId: claim.claimantId,
                     claimantName: claim.claimantName,
                     receivedAt: Date.now(),
@@ -129,14 +130,14 @@ export default function CopyrightAdminPage() {
                 
                 if (claim.action === 'delete_and_strike') {
                     updates[accusedUserStrikePath] = strikeData;
-                    updates[postRef.key] = null; // Mark post for deletion
+                    updates[postPath] = null; // Mark post for deletion
                     toast({ title: "Claim Approved", description: `A strike has been issued to ${claim.accusedUsername} and the post deleted.` });
                 } else if (claim.action === 'delete_only') {
-                     updates[postRef.key] = null; // Mark post for deletion
+                     updates[postPath] = null; // Mark post for deletion
                      toast({ title: "Claim Approved", description: `The post from ${claim.accusedUsername} has been deleted.` });
                 } else if (claim.action === 'strike_only') {
                     updates[accusedUserStrikePath] = strikeData;
-                    updates[`/posts/${claim.postId}/isCopyrighted`] = true; // Mark post as copyrighted
+                    updates[`${postPath}/isCopyrighted`] = true; // Mark post as copyrighted
                     toast({ title: "Claim Approved", description: `A copyright strike has been issued to ${claim.accusedUsername}.` });
                 }
 
@@ -219,7 +220,7 @@ export default function CopyrightAdminPage() {
                                             <TableCell className="font-mono">{claim.postId}</TableCell>
                                             <TableCell>
                                                 <Badge variant={claim.action === 'delete_and_strike' ? 'destructive' : (claim.action === 'strike_only' ? 'secondary' : 'default')}>
-                                                    {claim.action === 'delete_and_strike' ? 'Delete & Strike' : (claim.action === 'strike_only' ? 'Strike Only' : 'Delete Only')}
+                                                    {claim.action.replace('_', ' & ').replace(/\b\w/g, l => l.toUpperCase())}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center space-x-2">
