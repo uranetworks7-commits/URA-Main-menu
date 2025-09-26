@@ -1,5 +1,6 @@
 
 
+
 export interface Withdrawal {
   username: string;
   amount: number;
@@ -16,11 +17,13 @@ export interface CopyrightStrike {
     strikeId: string;
     claimantId: string;
     claimantName: string;
-
     receivedAt: number;
     expiresAt: number;
     status: 'active' | 'expired' | 'retracted';
     postId: string;
+    postContent: string;
+    imageUrl?: string;
+    videoUrl?: string;
 }
 
 export interface CopyrightMessage {
@@ -88,3 +91,4 @@ export interface Post {
   finalViewBoostApplied?: boolean;
   isCopyrighted?: boolean;
 }
+

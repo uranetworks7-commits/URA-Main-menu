@@ -9,9 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { format } from 'date-fns';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MessageSquare, Undo2, Loader2 } from 'lucide-react';
+import { MessageSquare, Undo2, Loader2, FileSearch } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ref, update, remove } from 'firebase/database';
+import { ref, update } from 'firebase/database';
 import { db } from '@/lib/firebase';
 import {
   AlertDialog,
@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { CommunicationDialog } from './communication-dialog';
+import { StrikeContentDialog } from './strike-content-dialog';
 
 
 interface CopyrightHistoryProps {
@@ -58,8 +59,10 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
     const { toast } = useToast();
     const [isRetractDialogOpen, setIsRetractDialogOpen] = useState(false);
     const [selectedClaim, setSelectedClaim] = useState<CopyrightClaim | null>(null);
+    const [selectedStrike, setSelectedStrike] = useState<CopyrightStrike | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isCommDialogOpen, setIsCommDialogOpen] = useState(false);
+    const [isContentDialogOpen, setIsContentDialogOpen] = useState(false);
 
     const submittedClaims = currentUser.submittedClaims ? Object.values(currentUser.submittedClaims).sort((a, b) => b.date - a.date) : [];
     const receivedStrikes = currentUser.copyrightStrikes ? Object.values(currentUser.copyrightStrikes).sort((a, b) => b.receivedAt - a.receivedAt) : [];
@@ -72,6 +75,11 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
     const handleContactClick = (claim: CopyrightClaim) => {
         setSelectedClaim(claim);
         setIsCommDialogOpen(true);
+    };
+
+    const handleViewContentClick = (strike: CopyrightStrike) => {
+        setSelectedStrike(strike);
+        setIsContentDialogOpen(true);
     };
 
     const handleConfirmRetract = async () => {
@@ -132,7 +140,8 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
                                         <TableCell>
                                             <Badge variant={getStatusVariant(strike.status)} className={getStatusColor(strike.status)}>{strike.status}</Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right space-x-2">
+                                            <Button variant="outline" size="sm" onClick={() => handleViewContentClick(strike)}><FileSearch className="h-4 w-4 mr-2" /> View Content</Button>
                                             <Button variant="outline" size="sm" onClick={() => handleContactClick({ id: strike.strikeId } as CopyrightClaim)}><MessageSquare className="h-4 w-4 mr-2" /> Contact</Button>
                                         </TableCell>
                                     </TableRow>
@@ -202,6 +211,13 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
                 onOpenChange={setIsCommDialogOpen}
                 claimId={selectedClaim.id}
                 currentUser={currentUser}
+            />
+        )}
+        {selectedStrike && (
+             <StrikeContentDialog
+                isOpen={isContentDialogOpen}
+                onOpenChange={setIsContentDialogOpen}
+                strike={selectedStrike}
             />
         )}
         </>

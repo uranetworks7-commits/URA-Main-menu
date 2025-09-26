@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { ref, onValue, update, remove } from "firebase/database";
+import { ref, onValue, update, get } from "firebase/database";
 import { Header } from '@/components/header';
 import { LeftSidebar } from '@/components/left-sidebar';
 import { RightSidebar } from '@/components/right-sidebar';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Check, X, ShieldCheck, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { User, CopyrightClaim } from '@/lib/types';
+import { User, CopyrightClaim, Post } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -100,32 +100,43 @@ export default function CopyrightAdminPage() {
             const claimPath = `/copyrightClaims/${claim.id}`;
             const accusedUserStrikePath = `/users/${claim.accusedUserId}/copyrightStrikes/${claim.id}`;
             const claimantSubmittedPath = `/users/${claim.claimantId}/submittedClaims/${claim.id}`;
-            const postPath = `/posts/${claim.postId}`;
-
-            const strikeData = {
-                strikeId: claim.id,
-                postId: claim.postId,
-                claimantId: claim.claimantId,
-                claimantName: claim.claimantName,
-                receivedAt: Date.now(),
-                expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
-                status: 'active'
-            };
+            const postRef = ref(db, `/posts/${claim.postId}`);
 
             if (action === 'approve') {
+                const postSnapshot = await get(postRef);
+                if (!postSnapshot.exists()) {
+                    toast({ title: "Error", description: "The related post no longer exists.", variant: "destructive" });
+                    setProcessingId(null);
+                    return;
+                }
+                const postData: Post = postSnapshot.val();
+
+                const strikeData = {
+                    strikeId: claim.id,
+                    postId: claim.postId,
+                    postContent: postData.content,
+                    imageUrl: postData.image || '',
+                    videoUrl: postData.video || '',
+                    claimantId: claim.claimantId,
+                    claimantName: claim.claimantName,
+                    receivedAt: Date.now(),
+                    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
+                    status: 'active'
+                };
+
                 updates[`${claimPath}/status`] = 'approved';
                 updates[`${claimantSubmittedPath}/status`] = 'approved';
                 
                 if (claim.action === 'delete_and_strike') {
                     updates[accusedUserStrikePath] = strikeData;
-                    updates[postPath] = null; // Delete the post
+                    updates[postRef.key] = null; // Mark post for deletion
                     toast({ title: "Claim Approved", description: `A strike has been issued to ${claim.accusedUsername} and the post deleted.` });
                 } else if (claim.action === 'delete_only') {
-                     updates[postPath] = null; // Delete the post
+                     updates[postRef.key] = null; // Mark post for deletion
                      toast({ title: "Claim Approved", description: `The post from ${claim.accusedUsername} has been deleted.` });
                 } else if (claim.action === 'strike_only') {
                     updates[accusedUserStrikePath] = strikeData;
-                    updates[`${postPath}/isCopyrighted`] = true; // Mark post as copyrighted
+                    updates[`/posts/${claim.postId}/isCopyrighted`] = true; // Mark post as copyrighted
                     toast({ title: "Claim Approved", description: `A copyright strike has been issued to ${claim.accusedUsername}.` });
                 }
 
