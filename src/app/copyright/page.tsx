@@ -9,9 +9,9 @@ import { RightSidebar } from '@/components/right-sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Copyright, ArrowLeft, Leaf, TriangleAlert, MessageSquare } from 'lucide-react';
+import { Copyright, ArrowLeft, Leaf } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { User, Post, CopyrightClaim } from '@/lib/types';
+import { User } from '@/lib/types';
 import { CopyrightStrikeAlert } from '@/components/copyright/copyright-strike-alert';
 import { CtrRequestDialog } from '@/components/copyright/ctr-request-dialog';
 import { CopyrightHistory } from '@/components/copyright/copyright-history';
@@ -101,7 +101,7 @@ export default function CopyrightPage() {
                                             <ArrowLeft className="h-5 w-5" />
                                         </Button>
                                         <div>
-                                            <CardTitle className="text-xl flex items-center gap-2">
+                                            <CardTitle className="text-lg flex items-center gap-2">
                                                 <Copyright className="h-5 w-5 text-primary" />
                                                 Copyright Center
                                             </CardTitle>
@@ -115,10 +115,10 @@ export default function CopyrightPage() {
                             </CardHeader>
                             <CardContent className="p-4 pt-0 grid md:grid-cols-2 gap-4">
                                 <Card>
-                                    <CardHeader>
+                                    <CardHeader className="p-3">
                                         <CardTitle className="text-base">Your Information</CardTitle>
                                     </CardHeader>
-                                    <CardContent className="text-xs space-y-2">
+                                    <CardContent className="text-xs space-y-2 p-3 pt-0">
                                         <p><strong>Username:</strong> {currentUser.name}</p>
                                         <p><strong>Main Account:</strong> {currentUser.mainAccountUsername}</p>
                                         <p><strong>Monetization:</strong> {currentUser.isMonetized ? 'Enabled' : 'Disabled'}</p>
@@ -131,7 +131,7 @@ export default function CopyrightPage() {
                                     <CardDescription className="text-center text-xs mb-4">
                                         If someone has copied your content, you can submit a copyright takedown request.
                                     </CardDescription>
-                                    <Button onClick={() => setIsCtrDialogOpen(true)}>
+                                    <Button size="sm" onClick={() => setIsCtrDialogOpen(true)}>
                                         Submit a CTR
                                     </Button>
                                 </Card>

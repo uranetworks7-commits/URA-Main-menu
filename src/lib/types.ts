@@ -16,6 +16,7 @@ export interface CopyrightStrike {
     strikeId: string;
     claimantId: string;
     claimantName: string;
+
     receivedAt: number;
     expiresAt: number;
     status: 'active' | 'expired' | 'retracted';
@@ -38,7 +39,7 @@ export interface CopyrightClaim {
     accusedUserId: string;
     accusedUsername: string;
     postId: string;
-    action: 'delete_only' | 'delete_and_strike';
+    action: 'delete_only' | 'strike_only' | 'delete_and_strike';
     originalContentUrl: string;
     date: number;
     status: 'pending' | 'approved' | 'rejected' | 'retracted';

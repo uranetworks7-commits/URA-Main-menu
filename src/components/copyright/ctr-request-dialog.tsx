@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { TriangleAlert, Loader2 } from 'lucide-react';
+import { TriangleAlert } from 'lucide-react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,7 +33,7 @@ interface CtrRequestDialogProps {
 const ctrFormSchema = z.object({
     postId: z.string().min(5, { message: "A valid Post ID is required." }),
     accusedUsername: z.string().min(1, "You must enter the username you are accusing."),
-    action: z.enum(['delete_only', 'delete_and_strike'], {
+    action: z.enum(['delete_only', 'strike_only', 'delete_and_strike'], {
         required_error: "You must select an action."
     }),
     originalContentUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
@@ -175,30 +175,26 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
                                 control={form.control}
                                 name="action"
                                 render={({ field }) => (
-                                    <FormItem className="space-y-3">
-                                        <FormLabel>Requested Action</FormLabel>
+                                    <FormItem className="space-y-2">
+                                        <FormLabel className="text-xs">Requested Action</FormLabel>
                                         <FormControl>
                                             <RadioGroup
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            className="flex flex-col space-y-1"
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                                className="flex flex-col space-y-1"
                                             >
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                <RadioGroupItem value="delete_only" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal">
-                                                Delete the content
-                                                </FormLabel>
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                <RadioGroupItem value="delete_and_strike" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal">
-                                                Delete the content and issue a copyright strike
-                                                </FormLabel>
-                                            </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl><RadioGroupItem value="delete_only" /></FormControl>
+                                                    <FormLabel className="font-normal text-sm">Delete the content</FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl><RadioGroupItem value="strike_only" /></FormControl>
+                                                    <FormLabel className="font-normal text-sm">Give a Copyright Strike</FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl><RadioGroupItem value="delete_and_strike" /></FormControl>
+                                                    <FormLabel className="font-normal text-sm">Delete the content and give a Copyright Strike</FormLabel>
+                                                </FormItem>
                                             </RadioGroup>
                                         </FormControl>
                                         <FormMessage />

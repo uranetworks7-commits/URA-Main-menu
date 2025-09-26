@@ -102,27 +102,31 @@ export default function CopyrightAdminPage() {
             const claimantSubmittedPath = `/users/${claim.claimantId}/submittedClaims/${claim.id}`;
             const postPath = `/posts/${claim.postId}`;
 
+            const strikeData = {
+                strikeId: claim.id,
+                postId: claim.postId,
+                claimantId: claim.claimantId,
+                claimantName: claim.claimantName,
+                receivedAt: Date.now(),
+                expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
+                status: 'active'
+            };
+
             if (action === 'approve') {
                 updates[`${claimPath}/status`] = 'approved';
                 updates[`${claimantSubmittedPath}/status`] = 'approved';
-                updates[`${postPath}/isCopyrighted`] = true; // Mark post as copyrighted
                 
                 if (claim.action === 'delete_and_strike') {
-                    const strikeData = {
-                        strikeId: claim.id,
-                        postId: claim.postId,
-                        claimantId: claim.claimantId,
-                        claimantName: claim.claimantName,
-                        receivedAt: Date.now(),
-                        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
-                        status: 'active'
-                    };
                     updates[accusedUserStrikePath] = strikeData;
-                     updates[postPath] = null; // Delete the post
-                    toast({ title: "Claim Approved", description: `A copyright strike has been issued to ${claim.accusedUsername} and the post has been deleted.` });
-                } else { // delete_only
+                    updates[postPath] = null; // Delete the post
+                    toast({ title: "Claim Approved", description: `A strike has been issued to ${claim.accusedUsername} and the post deleted.` });
+                } else if (claim.action === 'delete_only') {
                      updates[postPath] = null; // Delete the post
                      toast({ title: "Claim Approved", description: `The post from ${claim.accusedUsername} has been deleted.` });
+                } else if (claim.action === 'strike_only') {
+                    updates[accusedUserStrikePath] = strikeData;
+                    updates[`${postPath}/isCopyrighted`] = true; // Mark post as copyrighted
+                    toast({ title: "Claim Approved", description: `A copyright strike has been issued to ${claim.accusedUsername}.` });
                 }
 
             } else { // Reject
@@ -178,7 +182,7 @@ export default function CopyrightAdminPage() {
                                     <ArrowLeft className="h-5 w-5" />
                                 </Button>
                                 <div>
-                                    <CardTitle className="text-xl">Copyright Admin Panel</CardTitle>
+                                    <CardTitle className="text-lg">Copyright Admin Panel</CardTitle>
                                     <CardDescription className="text-xs">Review and manage pending copyright claims.</CardDescription>
                                 </div>
                             </div>
@@ -197,21 +201,21 @@ export default function CopyrightAdminPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {claims.length > 0 ? claims.map(claim => (
-                                        <TableRow key={claim.id}>
-                                            <TableCell className="text-xs font-medium">{claim.claimantName}</TableCell>
-                                            <TableCell className="text-xs">{claim.accusedUsername}</TableCell>
-                                            <TableCell className="text-xs">{format(new Date(claim.date), 'dd MMM yy')}</TableCell>
-                                            <TableCell className="font-mono text-xs">{claim.postId}</TableCell>
-                                            <TableCell className="text-xs">
-                                                <Badge variant={claim.action === 'delete_and_strike' ? 'destructive' : 'secondary'}>
-                                                    {claim.action === 'delete_and_strike' ? 'Delete & Strike' : 'Delete Only'}
+                                        <TableRow key={claim.id} className="text-xs">
+                                            <TableCell className="font-medium">{claim.claimantName}</TableCell>
+                                            <TableCell>{claim.accusedUsername}</TableCell>
+                                            <TableCell>{format(new Date(claim.date), 'dd MMM yy')}</TableCell>
+                                            <TableCell className="font-mono">{claim.postId}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={claim.action === 'delete_and_strike' ? 'destructive' : (claim.action === 'strike_only' ? 'secondary' : 'default')}>
+                                                    {claim.action === 'delete_and_strike' ? 'Delete & Strike' : (claim.action === 'strike_only' ? 'Strike Only' : 'Delete Only')}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center space-x-2">
                                                 <Button 
                                                     size="sm" 
                                                     variant="outline"
-                                                    className="border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+                                                    className="h-7 border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
                                                     onClick={() => handleClaim(claim, 'approve')}
                                                     disabled={processingId === claim.id}
                                                 >
@@ -220,6 +224,7 @@ export default function CopyrightAdminPage() {
                                                 <Button 
                                                     size="sm" 
                                                     variant="destructive"
+                                                    className="h-7"
                                                     onClick={() => handleClaim(claim, 'reject')}
                                                     disabled={processingId === claim.id}
                                                 >
@@ -229,7 +234,7 @@ export default function CopyrightAdminPage() {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8 text-sm">
                                                 No pending claims.
                                             </TableCell>
                                         </TableRow>
