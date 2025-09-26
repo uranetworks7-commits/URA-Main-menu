@@ -67,6 +67,13 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
         setIsRetractDialogOpen(true);
     }
     
+    const handleContactClick = () => {
+        toast({
+            title: "Feature Coming Soon",
+            description: "The ability to contact other users will be implemented in a future update.",
+        });
+    };
+
     const handleConfirmRetract = async () => {
         if (!selectedClaim) return;
         setIsProcessing(true);
@@ -126,7 +133,7 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
                                             <Badge variant={getStatusVariant(strike.status)} className={getStatusColor(strike.status)}>{strike.status}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="outline" size="sm"><MessageSquare className="h-4 w-4 mr-2" /> Contact</Button>
+                                            <Button variant="outline" size="sm" onClick={handleContactClick}><MessageSquare className="h-4 w-4 mr-2" /> Contact</Button>
                                         </TableCell>
                                     </TableRow>
                                 )) : (
