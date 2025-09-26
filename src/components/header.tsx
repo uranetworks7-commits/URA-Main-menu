@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare, BarChart, ThumbsUp, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Search, Home, Users, Clapperboard, Store, Menu, LogOut, Settings, PenSquare, BarChart, ThumbsUp, MessageSquare, ShieldCheck, Copyright } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
@@ -79,6 +79,10 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
                         <span>Your Comments</span>
                     </DropdownMenuItem>
                 </Link>
+                <DropdownMenuItem>
+                    <Copyright className="mr-2 h-4 w-4" />
+                    <span>Copyright</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <Link href="/pan-ads">
                     <DropdownMenuItem>
