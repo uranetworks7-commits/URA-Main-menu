@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { CommunicationDialog } from './communication-dialog';
 
 
 interface CopyrightHistoryProps {
@@ -58,6 +59,7 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
     const [isRetractDialogOpen, setIsRetractDialogOpen] = useState(false);
     const [selectedClaim, setSelectedClaim] = useState<CopyrightClaim | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isCommDialogOpen, setIsCommDialogOpen] = useState(false);
 
     const submittedClaims = currentUser.submittedClaims ? Object.values(currentUser.submittedClaims).sort((a, b) => b.date - a.date) : [];
     const receivedStrikes = currentUser.copyrightStrikes ? Object.values(currentUser.copyrightStrikes).sort((a, b) => b.receivedAt - a.receivedAt) : [];
@@ -67,11 +69,9 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
         setIsRetractDialogOpen(true);
     }
     
-    const handleContactClick = () => {
-        toast({
-            title: "Feature Coming Soon",
-            description: "The ability to contact other users will be implemented in a future update.",
-        });
+    const handleContactClick = (claim: CopyrightClaim) => {
+        setSelectedClaim(claim);
+        setIsCommDialogOpen(true);
     };
 
     const handleConfirmRetract = async () => {
@@ -133,7 +133,7 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
                                             <Badge variant={getStatusVariant(strike.status)} className={getStatusColor(strike.status)}>{strike.status}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="outline" size="sm" onClick={handleContactClick}><MessageSquare className="h-4 w-4 mr-2" /> Contact</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleContactClick({ id: strike.strikeId } as CopyrightClaim)}><MessageSquare className="h-4 w-4 mr-2" /> Contact</Button>
                                         </TableCell>
                                     </TableRow>
                                 )) : (
@@ -162,7 +162,8 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
                                         <TableCell>
                                             <Badge variant={getStatusVariant(claim.status)} className={getStatusColor(claim.status)}>{claim.status}</Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right space-x-2">
+                                             <Button variant="outline" size="sm" onClick={() => handleContactClick(claim)}><MessageSquare className="h-4 w-4 mr-2" /> Contact</Button>
                                             {claim.status === 'approved' && (
                                                 <Button variant="destructive" size="sm" onClick={() => handleRetractClick(claim)}><Undo2 className="h-4 w-4 mr-2" /> Retract</Button>
                                             )}
@@ -195,6 +196,14 @@ export function CopyrightHistory({ currentUser }: CopyrightHistoryProps) {
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+        {selectedClaim && (
+            <CommunicationDialog
+                isOpen={isCommDialogOpen}
+                onOpenChange={setIsCommDialogOpen}
+                claimId={selectedClaim.id}
+                currentUser={currentUser}
+            />
+        )}
         </>
     );
 }

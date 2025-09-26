@@ -1,4 +1,5 @@
 
+
 export interface Withdrawal {
   username: string;
   amount: number;
@@ -20,6 +21,14 @@ export interface CopyrightStrike {
     status: 'active' | 'expired' | 'retracted';
 }
 
+export interface CopyrightMessage {
+    id: string;
+    senderId: string;
+    senderName: string;
+    text: string;
+    timestamp: number;
+}
+
 export interface CopyrightClaim {
     id: string;
     claimantId: string;
@@ -31,6 +40,7 @@ export interface CopyrightClaim {
     originalContentUrl: string;
     date: number;
     status: 'pending' | 'approved' | 'rejected' | 'retracted';
+    messages?: { [key: string]: CopyrightMessage };
 }
 
 
