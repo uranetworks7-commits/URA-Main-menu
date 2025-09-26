@@ -79,10 +79,12 @@ export function Header({ currentUser, onLogout, onUpdateProfile, userPosts }: He
                         <span>Your Comments</span>
                     </DropdownMenuItem>
                 </Link>
-                <DropdownMenuItem>
-                    <Copyright className="mr-2 h-4 w-4" />
-                    <span>Copyright</span>
-                </DropdownMenuItem>
+                <Link href="/copyright">
+                  <DropdownMenuItem>
+                      <Copyright className="mr-2 h-4 w-4" />
+                      <span>Copyright</span>
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
                 <Link href="/pan-ads">
                     <DropdownMenuItem>

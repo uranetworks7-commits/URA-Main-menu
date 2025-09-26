@@ -22,69 +22,7 @@ import { ReportDialog } from './report-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { DeletePostDialog } from './delete-post-dialog';
-
-
-export interface Withdrawal {
-  username: string;
-  amount: number;
-  fee: number;
-  totalDeducted: number;
-  redeemCode: string;
-  timestamp: number;
-  status: 'pending' | 'cleared';
-  userId: string;
-  withdrawalId: string;
-}
-export interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  mainAccountUsername: string;
-  isMonetized?: boolean;
-  totalViews?: number;
-  totalLikes?: number;
-  withdrawals?: { [key: string]: Withdrawal };
-  dailyPostCount?: {
-      count: number;
-      date: string;
-  };
-}
-export interface Comment {
-    id: string;
-    user: User;
-    text: string;
-    createdAt: number;
-}
-
-export interface Post {
-  id: string;
-  user: User;
-  content: string;
-  image?: string;
-  video?: string;
-  imageHint?: string;
-  likes: { [key: string]: boolean };
-  comments: { [key: string]: Comment };
-  views: number;
-  createdAt: number;
-  // New fields for the stage system
-  viewStage?: 'A' | 'B' | 'C' | 'D' | 'E';
-  targetViews?: number;
-  stageAssignedAt?: number;
-  targetCompletedIn?: number; // hours
-  finalViewBoostApplied?: boolean;
-}
-
-interface PostCardProps {
-  post: Post;
-  currentUser: User;
-  onDeletePost: (postId: string) => void;
-  onLikePost: (postId: string) => void;
-  onAddComment: (postId: string, commentText: string) => void;
-  onDeleteComment: (postId: string, commentId: string) => void;
-  onReportPost: (postId: string, reason: string) => void;
-  onViewPost: (postId: string) => void;
-}
+import type { Post, User, Comment } from '@/lib/types';
 
 const parseCount = (count: number | undefined): number => {
     if (typeof count === 'number') return count;
@@ -132,7 +70,7 @@ function CommentOptionsMenu({ comment, post, currentUser, onDelete }: { comment:
 }
 
 
-export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onDeleteComment, onReportPost, onViewPost }: PostCardProps) {
+export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onDeleteComment, onReportPost, onViewPost }: any) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -259,7 +197,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const sortedComments = useMemo(() => {
     if (!post.comments) return [];
     return Object.entries(post.comments)
-      .map(([id, comment]) => ({ ...comment, id }))
+      .map(([id, comment]: [string, any]) => ({ ...comment, id }))
       .sort((a, b) => a.createdAt - b.createdAt);
   }, [post.comments]);
 
@@ -288,7 +226,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           <ReportDialog
             isOpen={isReportDialogOpen}
             onOpenChange={setIsReportDialogOpen}
-            onTextReport={(reason) => onReportPost(post.id, reason)}
+            onTextReport={(reason: string) => onReportPost(post.id, reason)}
             onCodeReport={handleCodeReport}
           >
             <DropdownMenu>
@@ -417,7 +355,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                 <h4 className="text-sm font-semibold mb-2">Comments</h4>
                 <div className="space-y-3 mb-4">
                     {sortedComments.length > 0 ? (
-                        sortedComments.map((comment) => (
+                        sortedComments.map((comment: Comment) => (
                             <div key={comment.id} className="flex items-start gap-2 text-xs">
                                 <Avatar className="h-6 w-6">
                                     <AvatarImage src={comment.user.avatar} />
