@@ -207,12 +207,8 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPublishing = secondsSinceCreation < 15;
   const showStats = secondsSinceCreation >= 60;
   
-  const handleCopyPostId = () => {
-    navigator.clipboard.writeText(post.id).then(() => {
-      toast({ title: "Post ID copied!" });
-    }).catch(err => {
-      toast({ title: "Failed to copy ID", variant: "destructive" });
-    });
+  const handleShowPostId = () => {
+    router.push(`/post-id/${post.id}`);
   };
 
   return (
@@ -291,9 +287,9 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                     <span>View Analytics</span>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onSelect={handleCopyPostId}>
+                <DropdownMenuItem onSelect={handleShowPostId}>
                     <Copy className="mr-2 h-4 w-4" />
-                    <span>Copy Post ID</span>
+                    <span>View Post ID</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {isPublisher && (
