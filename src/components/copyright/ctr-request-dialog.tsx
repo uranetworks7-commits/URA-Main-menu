@@ -33,7 +33,7 @@ interface CtrRequestDialogProps {
 const ctrFormSchema = z.object({
     companyName: z.string().optional(),
     originalContentUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
-    accusedUserId: z.string().min(1, "You must select the user you are accusing."),
+    accusedUsername: z.string().min(1, "You must enter the username you are accusing."),
     signature: z.string().min(3, "A signature is required."),
 });
 
@@ -59,14 +59,10 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
         defaultValues: {
             companyName: "",
             originalContentUrl: "",
-            accusedUserId: "",
+            accusedUsername: "",
             signature: "",
         },
     });
-    
-    const userList = Object.entries(users)
-        .map(([id, user]) => ({ id, ...user }))
-        .filter(user => user.id !== currentUser.id);
 
     const handleClose = () => {
         onOpenChange(false);
@@ -79,19 +75,27 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
     async function onSubmit(values: z.infer<typeof ctrFormSchema>) {
         setStep('processing');
         try {
+            const accusedUserEntry = Object.entries(users).find(([id, user]) => user.name === values.accusedUsername);
+
+            if (!accusedUserEntry) {
+                toast({ title: "User Not Found", description: `Could not find a user with the username "${values.accusedUsername}".`, variant: "destructive" });
+                setStep('form');
+                return;
+            }
+
+            const [accusedUserId, accusedUser] = accusedUserEntry;
+
             const claimRef = push(ref(db, 'copyrightClaims'));
             const claimId = claimRef.key;
             if (!claimId) throw new Error("Could not generate claim ID");
 
-            const accusedUser = users[values.accusedUserId];
-            
             const newClaim = {
                 id: claimId,
                 claimantId: currentUser.id,
                 claimantName: currentUser.name,
                 claimantCompanyName: values.companyName || '',
                 claimantSignature: values.signature,
-                accusedUserId: values.accusedUserId,
+                accusedUserId: accusedUserId,
                 accusedUsername: accusedUser.name,
                 originalContentUrl: values.originalContentUrl || '',
                 date: Date.now(),
@@ -175,24 +179,11 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
                             />
                              <FormField
                                 control={form.control}
-                                name="accusedUserId"
+                                name="accusedUsername"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-xs">Accused User</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select the user who copied your content" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {userList.map(user => (
-                                                    <SelectItem key={user.id} value={user.id}>
-                                                        {user.name} ({user.mainAccountUsername})
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <FormLabel className="text-xs">Accused User's Username</FormLabel>
+                                        <FormControl><Input placeholder="Enter the username you are accusing" {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -241,4 +232,3 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
         </Dialog>
     );
 }
-
