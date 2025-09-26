@@ -306,7 +306,15 @@ export default function AnalyticsPage() {
                                         <TableCell className="text-right text-xs">{views.toLocaleString()}</TableCell>
                                         <TableCell className="text-right text-xs">{likes.toLocaleString()}</TableCell>
                                         <TableCell className="text-right text-xs">{Object.keys(post.comments || {}).length.toLocaleString()}</TableCell>
-                                        <TableCell className="text-right font-medium text-green-500 text-xs">₹{revenue.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right font-medium text-green-500 text-xs">
+                                            {post.isCopyrighted ? (
+                                                <div className="flex justify-end">
+                                                    <Copyright className="h-4 w-4 text-destructive" />
+                                                </div>
+                                            ) : (
+                                                `₹${revenue.toFixed(2)}`
+                                            )}
+                                        </TableCell>
                                         <TableCell className="text-right text-xs">
                                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(post)}>
                                                 <Search className="h-3 w-3 mr-1" />
