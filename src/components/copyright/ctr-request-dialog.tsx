@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { User } from '@/lib/types';
 import { ref, push, update } from 'firebase/database';
 import { db } from '@/lib/firebase';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 interface CtrRequestDialogProps {
     isOpen: boolean;
@@ -31,9 +31,12 @@ interface CtrRequestDialogProps {
 }
 
 const ctrFormSchema = z.object({
-    companyName: z.string().optional(),
-    originalContentUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+    postId: z.string().min(5, { message: "A valid Post ID is required." }),
     accusedUsername: z.string().min(1, "You must enter the username you are accusing."),
+    action: z.enum(['delete_only', 'delete_and_strike'], {
+        required_error: "You must select an action."
+    }),
+    originalContentUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
     signature: z.string().min(3, "A signature is required."),
 });
 
@@ -57,9 +60,9 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
     const form = useForm<z.infer<typeof ctrFormSchema>>({
         resolver: zodResolver(ctrFormSchema),
         defaultValues: {
-            companyName: "",
-            originalContentUrl: "",
+            postId: "",
             accusedUsername: "",
+            originalContentUrl: "",
             signature: "",
         },
     });
@@ -93,10 +96,11 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
                 id: claimId,
                 claimantId: currentUser.id,
                 claimantName: currentUser.name,
-                claimantCompanyName: values.companyName || '',
                 claimantSignature: values.signature,
                 accusedUserId: accusedUserId,
                 accusedUsername: accusedUser.name,
+                postId: values.postId,
+                action: values.action,
                 originalContentUrl: values.originalContentUrl || '',
                 date: Date.now(),
                 status: 'pending' as const,
@@ -145,23 +149,58 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
                 {step === 'form' && (
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormItem>
-                                    <FormLabel className="text-xs">Your Username</FormLabel>
-                                    <Input disabled value={currentUser.name} />
-                                </FormItem>
-                                <FormItem>
-                                    <FormLabel className="text-xs">Main Account</FormLabel>
-                                    <Input disabled value={currentUser.mainAccountUsername} />
-                                </FormItem>
-                            </div>
-                             <FormField
+                            <FormField
                                 control={form.control}
-                                name="companyName"
+                                name="accusedUsername"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-xs">Company Name (Optional)</FormLabel>
-                                        <FormControl><Input placeholder="Your company or brand name" {...field} /></FormControl>
+                                        <FormLabel className="text-xs">Accused User's Username</FormLabel>
+                                        <FormControl><Input placeholder="Enter the username you are accusing" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="postId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-xs">Infringing Post ID</FormLabel>
+                                        <FormControl><Input placeholder="Paste the ID of the infringing post" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="action"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                        <FormLabel>Requested Action</FormLabel>
+                                        <FormControl>
+                                            <RadioGroup
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            className="flex flex-col space-y-1"
+                                            >
+                                            <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                <RadioGroupItem value="delete_only" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                Delete the content
+                                                </FormLabel>
+                                            </FormItem>
+                                            <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                <RadioGroupItem value="delete_and_strike" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                Delete the content and issue a copyright strike
+                                                </FormLabel>
+                                            </FormItem>
+                                            </RadioGroup>
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -173,17 +212,6 @@ export function CtrRequestDialog({ isOpen, onOpenChange, currentUser, users }: C
                                     <FormItem>
                                         <FormLabel className="text-xs">Original Content URL (Optional)</FormLabel>
                                         <FormControl><Input placeholder="https://example.com/my-video.mp4" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="accusedUsername"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-xs">Accused User's Username</FormLabel>
-                                        <FormControl><Input placeholder="Enter the username you are accusing" {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}

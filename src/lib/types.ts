@@ -19,6 +19,7 @@ export interface CopyrightStrike {
     receivedAt: number;
     expiresAt: number;
     status: 'active' | 'expired' | 'retracted';
+    postId: string;
 }
 
 export interface CopyrightMessage {
@@ -33,10 +34,11 @@ export interface CopyrightClaim {
     id: string;
     claimantId: string;
     claimantName: string;
-    claimantCompanyName: string;
     claimantSignature: string;
     accusedUserId: string;
     accusedUsername: string;
+    postId: string;
+    action: 'delete_only' | 'delete_and_strike';
     originalContentUrl: string;
     date: number;
     status: 'pending' | 'approved' | 'rejected' | 'retracted';
@@ -83,4 +85,5 @@ export interface Post {
   stageAssignedAt?: number;
   targetCompletedIn?: number; // hours
   finalViewBoostApplied?: boolean;
+  isCopyrighted?: boolean;
 }

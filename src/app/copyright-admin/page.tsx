@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -99,22 +100,31 @@ export default function CopyrightAdminPage() {
             const claimPath = `/copyrightClaims/${claim.id}`;
             const accusedUserStrikePath = `/users/${claim.accusedUserId}/copyrightStrikes/${claim.id}`;
             const claimantSubmittedPath = `/users/${claim.claimantId}/submittedClaims/${claim.id}`;
+            const postPath = `/posts/${claim.postId}`;
 
             if (action === 'approve') {
                 updates[`${claimPath}/status`] = 'approved';
                 updates[`${claimantSubmittedPath}/status`] = 'approved';
+                updates[`${postPath}/isCopyrighted`] = true; // Mark post as copyrighted
                 
-                const strikeData = {
-                    strikeId: claim.id,
-                    claimantId: claim.claimantId,
-                    claimantName: claim.claimantName,
-                    receivedAt: Date.now(),
-                    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
-                    status: 'active'
-                };
-                updates[accusedUserStrikePath] = strikeData;
+                if (claim.action === 'delete_and_strike') {
+                    const strikeData = {
+                        strikeId: claim.id,
+                        postId: claim.postId,
+                        claimantId: claim.claimantId,
+                        claimantName: claim.claimantName,
+                        receivedAt: Date.now(),
+                        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
+                        status: 'active'
+                    };
+                    updates[accusedUserStrikePath] = strikeData;
+                     updates[postPath] = null; // Delete the post
+                    toast({ title: "Claim Approved", description: `A copyright strike has been issued to ${claim.accusedUsername} and the post has been deleted.` });
+                } else { // delete_only
+                     updates[postPath] = null; // Delete the post
+                     toast({ title: "Claim Approved", description: `The post from ${claim.accusedUsername} has been deleted.` });
+                }
 
-                toast({ title: "Claim Approved", description: `A copyright strike has been issued to ${claim.accusedUsername}.` });
             } else { // Reject
                 updates[`${claimPath}/status`] = 'rejected';
                 updates[`${claimantSubmittedPath}/status`] = 'rejected';
@@ -180,7 +190,8 @@ export default function CopyrightAdminPage() {
                                         <TableHead className="text-xs">Claimant</TableHead>
                                         <TableHead className="text-xs">Accused</TableHead>
                                         <TableHead className="text-xs">Date</TableHead>
-                                        <TableHead className="text-xs">Link to Content</TableHead>
+                                        <TableHead className="text-xs">Post ID</TableHead>
+                                        <TableHead className="text-xs">Action</TableHead>
                                         <TableHead className="text-center text-xs">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -190,12 +201,11 @@ export default function CopyrightAdminPage() {
                                             <TableCell className="text-xs font-medium">{claim.claimantName}</TableCell>
                                             <TableCell className="text-xs">{claim.accusedUsername}</TableCell>
                                             <TableCell className="text-xs">{format(new Date(claim.date), 'dd MMM yy')}</TableCell>
+                                            <TableCell className="font-mono text-xs">{claim.postId}</TableCell>
                                             <TableCell className="text-xs">
-                                                {claim.originalContentUrl ? (
-                                                    <a href={claim.originalContentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                                                        View Content
-                                                    </a>
-                                                ) : "N/A"}
+                                                <Badge variant={claim.action === 'delete_and_strike' ? 'destructive' : 'secondary'}>
+                                                    {claim.action === 'delete_and_strike' ? 'Delete & Strike' : 'Delete Only'}
+                                                </Badge>
                                             </TableCell>
                                             <TableCell className="text-center space-x-2">
                                                 <Button 
@@ -219,7 +229,7 @@ export default function CopyrightAdminPage() {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                                                 No pending claims.
                                             </TableCell>
                                         </TableRow>

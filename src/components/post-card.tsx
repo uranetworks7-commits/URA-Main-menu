@@ -1,9 +1,10 @@
+
 'use client';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, ShieldCheck } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, Copyright, Copy } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -23,6 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { DeletePostDialog } from './delete-post-dialog';
 import type { Post, User, Comment } from '@/lib/types';
+import { Badge } from './ui/badge';
 
 const parseCount = (count: number | undefined): number => {
     if (typeof count === 'number') return count;
@@ -184,7 +186,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const isPostEligible = useMemo(() => viewsCount > 1000 && likesCount >= 10, [viewsCount, likesCount]);
 
   let revenue = 0;
-  if (post.user.isMonetized) {
+  if (post.user.isMonetized && !post.isCopyrighted) {
       if(post.video) {
         revenue = (viewsCount / 1250) * 25;
       } else if (post.image) {
@@ -204,10 +206,18 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const secondsSinceCreation = (Date.now() - (post.createdAt || Date.now())) / 1000;
   const isPublishing = secondsSinceCreation < 15;
   const showStats = secondsSinceCreation >= 60;
+  
+  const handleCopyPostId = () => {
+    navigator.clipboard.writeText(post.id).then(() => {
+      toast({ title: "Post ID copied!" });
+    }).catch(err => {
+      toast({ title: "Failed to copy ID", variant: "destructive" });
+    });
+  };
 
   return (
     <>
-    <Card>
+    <Card className={cn(post.isCopyrighted && "border-destructive/50")}>
       <CardHeader className="p-4">
         <div className="flex items-center gap-3">
           <Avatar>
@@ -221,7 +231,15 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
               <p className="font-bold text-foreground">{post.user.name}</p>
               {post.user.isMonetized && <BadgeCheck className="h-5 w-5 text-blue-500" />}
             </div>
-            <p className="text-xs text-muted-foreground">{timeAgo}</p>
+            <div className="flex items-center gap-2">
+                <p className="text-xs text-muted-foreground">{timeAgo}</p>
+                {post.isCopyrighted && (
+                    <Badge variant="destructive" className="text-xs">
+                        <Copyright className="mr-1 h-3 w-3" />
+                        Copyright
+                    </Badge>
+                )}
+            </div>
           </div>
           <ReportDialog
             isOpen={isReportDialogOpen}
@@ -261,7 +279,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                   <span>{formatCount(sortedComments.length)} Comments</span>
                 </DropdownMenuItem>
                  {isPublisher && post.user.isMonetized && (
-                    <DropdownMenuItem disabled className={cn(showStats ? "text-green-500" : "text-muted-foreground")}>
+                    <DropdownMenuItem disabled className={cn(showStats ? (post.isCopyrighted ? "text-destructive" : "text-green-500") : "text-muted-foreground")}>
                        <DollarSign className="mr-2 h-4 w-4" />
                        <span>{showStats ? `₹${revenue.toFixed(2)} Revenue` : 'Calculating Revenue...'}</span>
                     </DropdownMenuItem>
@@ -273,6 +291,11 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                     <span>View Analytics</span>
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem onSelect={handleCopyPostId}>
+                    <Copy className="mr-2 h-4 w-4" />
+                    <span>Copy Post ID</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 {isPublisher && (
                     <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />
