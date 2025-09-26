@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History, Search, ShieldCheck, Copy } from 'lucide-react';
+import { DollarSign, Eye, ThumbsUp, ArrowLeft, BadgeCheck, PartyPopper, History, Search, ShieldCheck, Copy, Copyright } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
@@ -279,7 +279,12 @@ export default function AnalyticsPage() {
                                         <TableCell className="max-w-[100px] md:max-w-xs truncate font-medium text-xs">{post.content}</TableCell>
                                         <TableCell className="text-xs">{format(new Date(post.createdAt), 'dd MMM yy')}</TableCell>
                                         <TableCell className="text-center">
-                                            {currentUser.isMonetized ? (
+                                            {post.isCopyrighted ? (
+                                                <Badge variant="destructive" className="text-xs">
+                                                    <Copyright className="mr-1 h-3 w-3" />
+                                                    Copyright
+                                                </Badge>
+                                            ) : currentUser.isMonetized ? (
                                                 revenue > 0 ? (
                                                     <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
                                                         <PartyPopper className="mr-1 h-3 w-3" />
