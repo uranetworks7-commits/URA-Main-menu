@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -15,6 +14,7 @@ import { User, CopyrightClaim } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 function AdminLoginPage({ onLoginSuccess }: { onLoginSuccess: () => void }) {
     const [key, setKey] = useState('');
@@ -234,4 +234,3 @@ export default function CopyrightAdminPage() {
         </div>
     );
 }
-
