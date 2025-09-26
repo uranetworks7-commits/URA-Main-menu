@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
@@ -109,20 +110,22 @@ export default function AnalyticsPage() {
   };
   
   const totalRevenue = useMemo(() => {
-      if (!currentUser?.isMonetized) return 0;
-      return userPosts.reduce((total, post) => {
+    if (!currentUser?.isMonetized) return 0;
+    return userPosts.reduce((total, post) => {
         const views = post.views || 0;
         let postRevenue = 0;
-        if(post.video) {
-            postRevenue = (views / 1250) * 25;
-        } else if (post.image) {
-            postRevenue = (views / 1250) * 15;
-        } else {
-            postRevenue = (views / 1250) * 10;
+        if (!post.isCopyrighted) {
+            if(post.video) {
+                postRevenue = (views / 1250) * 25;
+            } else if (post.image) {
+                postRevenue = (views / 1250) * 15;
+            } else {
+                postRevenue = (views / 1250) * 10;
+            }
         }
         return total + postRevenue;
     }, 0);
-  }, [userPosts, currentUser?.isMonetized]);
+}, [userPosts, currentUser?.isMonetized]);
 
   const totalWithdrawals = useMemo(() => {
     if (!currentUser?.withdrawals) return 0;
@@ -259,7 +262,7 @@ export default function AnalyticsPage() {
                                 const likes = Object.keys(post.likes || {}).length;
                                 
                                 let revenue = 0;
-                                if (currentUser.isMonetized) {
+                                if (currentUser.isMonetized && !post.isCopyrighted) {
                                     if(post.video) {
                                         revenue = (views / 1250) * 25;
                                     } else if (post.image) {
@@ -399,3 +402,5 @@ export default function AnalyticsPage() {
     </>
   );
 }
+
+    
