@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
 import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, Copyright, Copy, X, IndianRupee } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -86,6 +86,35 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const [isPostIdDialogOpen, setIsPostIdDialogOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(error => {
+            // Autoplay was prevented.
+            console.warn("Autoplay was prevented for video:", post.id, error);
+          });
+        } else {
+          video.pause();
+          video.currentTime = 0;
+        }
+      },
+      {
+        threshold: 0.5, // Play when 50% of the video is visible
+      }
+    );
+
+    observer.observe(video);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [post.id]);
 
   const [timeAgo, setTimeAgo] = useState(() => {
     if (!post.createdAt) return 'just now';
@@ -326,10 +355,13 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
        {post.video && (
           <div className="w-full bg-black cursor-pointer" onClick={() => onViewPost(post.id)}>
               <video
+                  ref={videoRef}
                   src={post.video}
-                  controls
+                  muted
+                  loop
+                  playsInline
                   poster="https://i.postimg.cc/Z54t2P6S/20250927-145323.jpg"
-                  className="w-full aspect-video"
+                  className="w-full aspect-video object-contain"
               />
           </div>
         )}
