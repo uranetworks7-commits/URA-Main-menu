@@ -97,7 +97,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
         if (entry.isIntersecting) {
           video.play().catch(error => {
             // Autoplay was prevented.
-            console.warn("Autoplay was prevented for video:", post.id, error);
+            console.warn("Autoplay with sound was prevented for video:", post.id, error);
           });
         } else {
           video.pause();
@@ -357,7 +357,6 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
               <video
                   ref={videoRef}
                   src={post.video}
-                  muted
                   loop
                   playsInline
                   poster="https://i.postimg.cc/Z54t2P6S/20250927-145323.jpg"
@@ -483,5 +482,3 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     </>
   );
 }
-
-    
