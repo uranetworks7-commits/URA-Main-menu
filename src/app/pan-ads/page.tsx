@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
@@ -50,10 +51,14 @@ function CreateUserForm({ onAccountCreated }: { onAccountCreated: () => void }) 
         setIsSubmitting(true);
         try {
             const formattedName = values.name.startsWith('@') ? values.name : `@${values.name}`;
-            const userId = `user-${formattedName.substring(1)}-${Date.now()}`;
-            const userRef = ref(db, `users/${userId}`);
+            
+            const userRef = push(ref(db, 'users'));
+            const userId = userRef.key;
+            if (!userId) throw new Error("Could not generate user ID");
 
-            const newUser: Omit<User, 'id'> = {
+
+            const newUser: User = {
+                id: userId,
                 name: formattedName,
                 mainAccountUsername: values.mainAccountUsername,
                 avatar: values.avatar,
@@ -66,7 +71,7 @@ function CreateUserForm({ onAccountCreated }: { onAccountCreated: () => void }) 
                 submittedClaims: {}
             };
             
-            await set(userRef, newUser);
+            await set(ref(db, `users/${userId}`), newUser);
 
             toast({
                 title: "Account Created",
