@@ -328,7 +328,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
               <video
                   src={post.video}
                   controls
-                  poster={post.videoThumbnail}
+                  poster="https://i.postimg.cc/Z54t2P6S/20250927-145323.jpg"
                   className="w-full aspect-video"
               />
           </div>
