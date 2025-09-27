@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, Copyright, Copy } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, Copyright, Copy, X } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -25,6 +25,7 @@ import { useRouter } from 'next/navigation';
 import { DeletePostDialog } from './delete-post-dialog';
 import type { Post, User, Comment } from '@/lib/types';
 import { Badge } from './ui/badge';
+import { PostIdDialog } from './post-id-dialog';
 
 const parseCount = (count: number | undefined): number => {
     if (typeof count === 'number') return count;
@@ -82,6 +83,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const [commentText, setCommentText] = useState('');
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPostIdDialogOpen, setIsPostIdDialogOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -208,7 +210,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const showStats = secondsSinceCreation >= 60;
   
   const handleShowPostId = () => {
-    router.push(`/post-id/${post.id}`);
+    setIsPostIdDialogOpen(true);
   };
 
   return (
@@ -277,7 +279,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                  {isPublisher && post.user.isMonetized && (
                     <DropdownMenuItem disabled className={cn(showStats ? (post.isCopyrighted ? "text-destructive" : "text-green-500") : "text-muted-foreground")}>
                        <DollarSign className="mr-2 h-4 w-4" />
-                       <span>{showStats ? `₹${revenue.toFixed(2)} Revenue` : 'Calculating Revenue...'}</span>
+                       <span>{showStats ? (post.isCopyrighted ? 'No Revenue' : `₹${revenue.toFixed(2)} Revenue`) : 'Calculating Revenue...'}</span>
                     </DropdownMenuItem>
                  )}
                 <DropdownMenuSeparator />
@@ -346,11 +348,19 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                   <Eye className="h-4 w-4" />
                   <span>{formatCount(viewsCount)}</span>
                 </div>
-                {isPublisher && post.user.isMonetized && revenue > 0 && (
-                   <div className="flex items-center gap-1 text-green-500">
-                     <DollarSign className="h-4 w-4" />
-                     <span>₹{revenue.toFixed(2)} Revenue</span>
-                   </div>
+                {isPublisher && post.user.isMonetized && (
+                  <div className="flex items-center gap-1">
+                    {post.isCopyrighted ? (
+                      <div className="relative text-destructive">
+                        <X className="h-4 w-4" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-green-500">
+                        <DollarSign className="h-4 w-4" />
+                        <span>₹{revenue.toFixed(2)} Revenue</span>
+                      </div>
+                    )}
+                  </div>
                 )}
             </>
           )}
@@ -432,8 +442,11 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
           onConfirm={() => onDeletePost(post.id)}
         />
       )}
+      <PostIdDialog 
+        isOpen={isPostIdDialogOpen}
+        onOpenChange={setIsPostIdDialogOpen}
+        postId={post.id}
+      />
     </>
   );
 }
-
-    
