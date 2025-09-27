@@ -1,6 +1,7 @@
 
 
 
+
 export interface Withdrawal {
   username: string;
   amount: number;
@@ -79,6 +80,7 @@ export interface Post {
   content: string;
   image?: string;
   video?: string;
+  videoThumbnail?: string;
   imageHint?: string;
   likes: { [key: string]: boolean };
   comments: { [key: string]: Comment };
@@ -92,3 +94,4 @@ export interface Post {
   isCopyrighted?: boolean;
 }
 
+    

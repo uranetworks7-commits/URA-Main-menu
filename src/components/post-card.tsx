@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, Copyright, Copy, X } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, DollarSign, Eye, MoreHorizontal, CheckCircle, Trash2, Send, ShieldAlert, BadgeCheck, PenSquare, Copyright, Copy, X, IndianRupee } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -328,7 +328,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
               <video
                   src={post.video}
                   controls
-                  muted
+                  poster={post.videoThumbnail}
                   className="w-full aspect-video"
               />
           </div>
@@ -352,7 +352,8 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
                   <div className="flex items-center gap-1">
                     {post.isCopyrighted ? (
                       <div className="relative text-destructive">
-                        <X className="h-4 w-4" />
+                          <IndianRupee className="h-4 w-4" />
+                          <X className="absolute top-0 left-0 h-4 w-4" />
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 text-green-500">
@@ -450,3 +451,5 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     </>
   );
 }
+
+    
