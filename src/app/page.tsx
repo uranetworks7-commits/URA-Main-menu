@@ -76,6 +76,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [viewedPosts, setViewedPosts] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortType>('feed');
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -568,6 +569,8 @@ export default function HomePage() {
                     onDeleteComment={handleDeleteComment}
                     onReportPost={handleReportPost}
                     onViewPost={handleViewPost}
+                    playingVideoId={playingVideoId}
+                    onPlayVideo={setPlayingVideoId}
                 />
               ))}
             </div>

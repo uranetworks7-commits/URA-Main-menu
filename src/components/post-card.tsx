@@ -73,7 +73,7 @@ function CommentOptionsMenu({ comment, post, currentUser, onDelete }: { comment:
 }
 
 
-export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onDeleteComment, onReportPost, onViewPost }: any) {
+export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddComment, onDeleteComment, onReportPost, onViewPost, playingVideoId, onPlayVideo }: any) {
   // If post or post.user is missing, don't render the card.
   if (!post || !post.user) {
     return null;
@@ -87,6 +87,7 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
   const { toast } = useToast();
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [showControls, setShowControls] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -95,17 +96,18 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.play().catch(error => {
-            // Autoplay was prevented.
-            console.warn("Autoplay with sound was prevented for video:", post.id, error);
-          });
+            onPlayVideo(post.id);
+            video.play().catch(error => {
+                console.warn("Autoplay with sound was prevented for video:", post.id, error);
+            });
         } else {
-          video.pause();
-          video.currentTime = 0;
+            video.pause();
+            video.currentTime = 0;
+            setShowControls(false); // Hide controls when video scrolls out
         }
       },
       {
-        threshold: 0.5, // Play when 50% of the video is visible
+        threshold: 0.5,
       }
     );
 
@@ -114,7 +116,23 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
     return () => {
       observer.disconnect();
     };
-  }, [post.id]);
+  }, [post.id, onPlayVideo]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+        if (playingVideoId !== post.id) {
+            video.pause();
+        }
+    }
+  }, [playingVideoId, post.id]);
+
+
+  const handleDoubleClick = () => {
+    if (videoRef.current) {
+        setShowControls(prev => !prev);
+    }
+  };
 
   const [timeAgo, setTimeAgo] = useState(() => {
     if (!post.createdAt) return 'just now';
@@ -353,12 +371,13 @@ export function PostCard({ post, currentUser, onDeletePost, onLikePost, onAddCom
         </div>
       )}
        {post.video && (
-          <div className="w-full bg-black cursor-pointer" onClick={() => onViewPost(post.id)}>
+          <div className="w-full bg-black cursor-pointer" onDoubleClick={handleDoubleClick}>
               <video
                   ref={videoRef}
                   src={post.video}
                   loop
                   playsInline
+                  controls={showControls}
                   poster="https://i.postimg.cc/Z54t2P6S/20250927-145323.jpg"
                   className="w-full aspect-video object-contain"
               />
