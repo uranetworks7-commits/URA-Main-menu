@@ -17,7 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, Upload, Loader2, Link2, FileUp } from 'lucide-react';
+import { AlertCircle, Upload, Loader2, Link2 } from 'lucide-react';
 import { uploadFile } from '@/lib/file-upload';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -144,38 +144,38 @@ export function MediaPostDialog({
                         name="mediaUrl"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Your {mediaType}</FormLabel>
+                                <div className="flex justify-between items-center">
+                                    <FormLabel>Your {mediaType}</FormLabel>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={toggleUploadMode}
+                                      title={uploadMode === 'file' ? 'Switch to URL input' : 'Switch to file upload'}
+                                    >
+                                      <Link2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                                 <FormControl>
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            placeholder={uploadMode === 'file' ? `Your ${mediaType} URL will appear here` : `https://example.com/image.png`}
-                                            readOnly={uploadMode === 'file'}
-                                            {...field}
-                                        />
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          size="icon"
-                                          onClick={toggleUploadMode}
-                                          title={uploadMode === 'file' ? 'Upload via URL' : 'Upload from file'}
+                                  <div>
+                                    {uploadMode === 'file' ? (
+                                      <div className="space-y-2">
+                                        <Button 
+                                            type="button" 
+                                            variant="outline"
+                                            size="lg"
+                                            className="w-full"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isUploading}
                                         >
-                                          {uploadMode === 'file' ? <Link2 className="h-4 w-4" /> : <FileUp className="h-4 w-4" />}
+                                            {isUploading ? (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                            ) : (
+                                                <Upload className="mr-2 h-4 w-4" />
+                                            )}
+                                            {isUploading ? 'Uploading...' : `Upload ${mediaType}`}
                                         </Button>
-                                        {uploadMode === 'file' && (
-                                          <Button 
-                                              type="button" 
-                                              variant="outline"
-                                              size="icon"
-                                              onClick={() => fileInputRef.current?.click()}
-                                              disabled={isUploading}
-                                          >
-                                              {isUploading ? (
-                                                  <Loader2 className="h-4 w-4 animate-spin"/>
-                                              ) : (
-                                                  <Upload className="h-4 w-4" />
-                                              )}
-                                          </Button>
-                                        )}
                                         <input
                                           type="file"
                                           ref={fileInputRef}
@@ -183,6 +183,20 @@ export function MediaPostDialog({
                                           className="hidden"
                                           accept={mediaType === 'image' ? 'image/*' : 'video/*'}
                                         />
+                                        {field.value && (
+                                            <Input
+                                                placeholder={`Your ${mediaType} URL will appear here`}
+                                                readOnly
+                                                {...field}
+                                            />
+                                        )}
+                                      </div>
+                                    ) : (
+                                       <Input
+                                            placeholder={`https://example.com/image.png`}
+                                            {...field}
+                                        />
+                                    )}
                                     </div>
                                 </FormControl>
                                 <FormMessage />
