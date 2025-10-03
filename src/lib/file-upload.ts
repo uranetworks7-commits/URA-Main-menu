@@ -1,28 +1,45 @@
 
 'use client';
 
-// This is a mock file upload service.
-// In a real application, you would replace this with a call to a
-// proper file storage service like Firebase Storage, AWS S3, or Cloudinary.
-
+/**
+ * Uploads a file to catbox.moe.
+ * @param file The file to upload.
+ * @returns The URL of the uploaded file.
+ */
 export async function uploadFile(file: File): Promise<string> {
-  console.log(`Simulating upload for file: ${file.name}`);
-
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  // In a real implementation, you'd get the URL from the upload service.
-  // For now, we'll return a static placeholder based on the file type.
-  const isImage = file.type.startsWith('image/');
+  console.log(`Uploading file to Catbox.moe: ${file.name}`);
   
-  if (isImage) {
-    // Return a random image from picsum.photos for variety
-    const randomId = Math.floor(Math.random() * 1000);
-    console.log(`Returning placeholder image URL: https://picsum.photos/seed/${randomId}/800/600`);
-    return `https://picsum.photos/seed/${randomId}/800/600`;
-  } else {
-    // Return a static video URL
-    console.log('Returning placeholder video URL');
-    return 'https://files.catbox.moe/p28li7.mp4';
+  const formData = new FormData();
+  formData.append('reqtype', 'fileupload');
+  formData.append('fileToUpload', file);
+
+  try {
+    const response = await fetch('https://catbox.moe/user/api.php', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed with status: ${response.statusText}`);
+    }
+
+    const fileUrl = await response.text();
+    
+    if (!fileUrl.startsWith('http')) {
+        throw new Error(`Invalid response from Catbox.moe: ${fileUrl}`);
+    }
+
+    console.log(`File uploaded successfully: ${fileUrl}`);
+    return fileUrl;
+
+  } catch (error) {
+    console.error('Catbox.moe upload error:', error);
+    // Fallback to a placeholder if the upload fails
+    const isImage = file.type.startsWith('image/');
+    if (isImage) {
+      return `https://picsum.photos/seed/${Math.random()}/800/600`;
+    } else {
+      return 'https://files.catbox.moe/p28li7.mp4';
+    }
   }
 }
