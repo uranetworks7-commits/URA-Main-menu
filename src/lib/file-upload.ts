@@ -2,43 +2,45 @@
 'use client';
 
 /**
- * Uploads a file to catbox.moe.
+ * Uploads a file by sending it to our own API route, which then proxies to catbox.moe.
  * @param file The file to upload.
  * @returns The URL of the uploaded file.
  */
 export async function uploadFile(file: File): Promise<string> {
-  console.log(`Uploading file to Catbox.moe: ${file.name}`);
+  console.log(`Uploading file via proxy: ${file.name}`);
   
   const formData = new FormData();
-  formData.append('reqtype', 'fileupload');
-  formData.append('fileToUpload', file);
+  formData.append('file', file);
 
   try {
-    const response = await fetch('https://catbox.moe/user/api.php', {
+    const response = await fetch('/api/upload', {
       method: 'POST',
       body: formData,
     });
 
     if (!response.ok) {
-      throw new Error(`Upload failed with status: ${response.statusText}`);
+        const errorText = await response.text();
+      throw new Error(`Upload failed: ${errorText}`);
     }
 
-    const fileUrl = await response.text();
+    const { url: fileUrl } = await response.json();
     
-    if (!fileUrl.startsWith('http')) {
-        throw new Error(`Invalid response from Catbox.moe: ${fileUrl}`);
+    if (!fileUrl || !fileUrl.startsWith('http')) {
+        throw new Error(`Invalid URL from server: ${fileUrl}`);
     }
 
     console.log(`File uploaded successfully: ${fileUrl}`);
     return fileUrl;
 
   } catch (error) {
-    console.error('Catbox.moe upload error:', error);
-    // Fallback to a placeholder if the upload fails
+    console.error('File upload error:', error);
+    // Fallback to a placeholder if the upload fails for any reason
     const isImage = file.type.startsWith('image/');
     if (isImage) {
-      return `https://picsum.photos/seed/${Math.random()}/800/600`;
+      // A reliable image placeholder
+      return 'https://i.postimg.cc/8Cg1gW3w/placeholder.png';
     } else {
+      // A reliable video placeholder
       return 'https://files.catbox.moe/p28li7.mp4';
     }
   }
