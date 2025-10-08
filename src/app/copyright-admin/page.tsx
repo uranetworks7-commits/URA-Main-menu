@@ -98,13 +98,14 @@ export default function CopyrightAdminPage() {
         try {
             const updates: { [key: string]: any } = {};
             const claimPath = `/copyrightClaims/${claim.id}`;
-            const accusedUserStrikePath = `/users/${claim.accusedUserId}/copyrightStrikes/${claim.id}`;
+            const accusedUserRef = ref(db, `users/${claim.accusedUserId}`);
             const claimantSubmittedPath = `/users/${claim.claimantId}/submittedClaims/${claim.id}`;
             const postPath = `/posts/${claim.postId}`;
             const postRef = ref(db, postPath);
 
             if (action === 'approve') {
-                const postSnapshot = await get(postRef);
+                const [accusedUserSnapshot, postSnapshot] = await Promise.all([get(accusedUserRef), get(postRef)]);
+                
                 if (!postSnapshot.exists()) {
                     toast({ title: "Error", description: "The related post no longer exists.", variant: "destructive" });
                     setProcessingId(null);
@@ -122,21 +123,34 @@ export default function CopyrightAdminPage() {
                     claimantName: claim.claimantName,
                     receivedAt: Date.now(),
                     expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
-                    status: 'active'
+                    status: 'active' as const
                 };
 
                 updates[`${claimPath}/status`] = 'approved';
                 updates[`${claimantSubmittedPath}/status`] = 'approved';
                 
+                if (claim.action === 'delete_and_strike' || claim.action === 'strike_only') {
+                    updates[`/users/${claim.accusedUserId}/copyrightStrikes/${claim.id}`] = strikeData;
+
+                    if (accusedUserSnapshot.exists()) {
+                        const accusedUserData = accusedUserSnapshot.val();
+                        const activeStrikes = Object.values(accusedUserData.copyrightStrikes || {}).filter((s: any) => s.status === 'active').length;
+                        
+                        if (activeStrikes + 1 >= 3) {
+                            updates[`/users/${claim.accusedUserId}/accountStatus`] = 'terminated';
+                            updates[`/users/${claim.accusedUserId}/terminationReason`] = '3 copyright strikes';
+                            updates[`/users/${claim.accusedUserId}/isLocked`] = true;
+                        }
+                    }
+                }
+
                 if (claim.action === 'delete_and_strike') {
-                    updates[accusedUserStrikePath] = strikeData;
                     updates[postPath] = null; // Mark post for deletion
                     toast({ title: "Claim Approved", description: `A strike has been issued to ${claim.accusedUsername} and the post deleted.` });
                 } else if (claim.action === 'delete_only') {
                      updates[postPath] = null; // Mark post for deletion
                      toast({ title: "Claim Approved", description: `The post from ${claim.accusedUsername} has been deleted.` });
                 } else if (claim.action === 'strike_only') {
-                    updates[accusedUserStrikePath] = strikeData;
                     updates[`${postPath}/isCopyrighted`] = true; // Mark post as copyrighted
                     toast({ title: "Claim Approved", description: `A copyright strike has been issued to ${claim.accusedUsername}.` });
                 }

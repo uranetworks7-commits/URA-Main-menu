@@ -2,6 +2,7 @@
 
 
 
+
 export interface Withdrawal {
   username: string;
   amount: number;
@@ -66,6 +67,9 @@ export interface User {
   };
   copyrightStrikes?: { [key: string]: CopyrightStrike };
   submittedClaims?: { [key: string]: CopyrightClaim };
+  isLocked?: boolean;
+  accountStatus?: 'active' | 'terminated';
+  terminationReason?: string;
 }
 export interface Comment {
     id: string;
@@ -93,5 +97,3 @@ export interface Post {
   finalViewBoostApplied?: boolean;
   isCopyrighted?: boolean;
 }
-
-    

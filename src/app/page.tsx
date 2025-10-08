@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '@/lib/firebase';
@@ -133,6 +134,58 @@ export default function HomePage() {
       });
     }
   }, [isClient]);
+
+    // Handle copyright strike expiration and account status
+    useEffect(() => {
+        if (!currentUser) return;
+
+        const now = Date.now();
+        const userRef = ref(db, `users/${currentUser.id}`);
+        const updates: { [key: string]: any } = {};
+        let activeStrikeCount = 0;
+        let hasChanges = false;
+
+        if (currentUser.copyrightStrikes) {
+            Object.values(currentUser.copyrightStrikes).forEach(strike => {
+                if (strike.status === 'active') {
+                    if (now > strike.expiresAt) {
+                        updates[`copyrightStrikes/${strike.strikeId}/status`] = 'expired';
+                        hasChanges = true;
+                    } else {
+                        activeStrikeCount++;
+                    }
+                }
+            });
+        }
+        
+        if (activeStrikeCount >= 3) {
+            if (!currentUser.isLocked) {
+                updates['isLocked'] = true;
+                updates['accountStatus'] = 'terminated';
+                updates['terminationReason'] = 'Account terminated due to 3 active copyright strikes.';
+                hasChanges = true;
+
+                toast({
+                    title: "Account Locked",
+                    description: "Your account has been locked due to multiple copyright violations.",
+                    variant: "destructive",
+                    duration: Infinity,
+                });
+
+                // Log the user out after a short delay
+                setTimeout(() => {
+                    localStorage.removeItem('currentUser');
+                    window.location.reload();
+                }, 5000);
+            }
+        }
+
+        if (hasChanges) {
+            update(userRef, updates);
+        }
+
+    }, [currentUser, toast]);
+
 
   // Reset daily post count if the day has changed (IST)
     useEffect(() => {
@@ -428,6 +481,10 @@ export default function HomePage() {
         for (const userId in usersData) {
             const user = usersData[userId];
             
+            if (user.isLocked) {
+                continue; // Skip locked accounts
+            }
+
             if (mainAccountUsername && user.mainAccountUsername === mainAccountUsername) {
                 // If a main account username is provided, we prioritize it.
                 // If a chat name is also provided, we make sure it matches.
@@ -452,7 +509,7 @@ export default function HomePage() {
         } else {
              toast({
                 title: "Login Failed",
-                description: "No account found with the provided credentials. Please check your details and try again.",
+                description: "No account found with the provided credentials, or the account is locked. Please check your details and try again.",
                 variant: "destructive",
             });
         }
