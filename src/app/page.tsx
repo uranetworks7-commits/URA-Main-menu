@@ -15,6 +15,7 @@ import { Search } from 'lucide-react';
 import { UraIcon } from '@/components/ura-icon';
 import { FilterDropdown, SortType } from '@/components/filter-dropdown';
 
+
 const initialPosts: Omit<Post, 'id' | 'createdAt'>[] = [
     {
     user: { id: 'user-1', name: 'URA Studio', avatar: `https://placehold.co/150x150/222/fff?text=U`, isMonetized: false, totalViews: 0, totalLikes: 0 },
@@ -68,7 +69,7 @@ const getISTDateString = () => {
     return istDate.toISOString().split('T')[0];
 };
 
-export default function HomePage() {
+function HomePageContent() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -79,6 +80,10 @@ export default function HomePage() {
   const [sortBy, setSortBy] = useState<SortType>('feed');
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
 
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('currentUser');
+    setCurrentUser(null);
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
@@ -88,24 +93,43 @@ export default function HomePage() {
   
   useEffect(() => {
     if (isClient) {
-      const savedUser = localStorage.getItem('currentUser');
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-        const userRef = ref(db, `users/${user.id}`);
-        onValue(userRef, (snapshot) => {
-            const userData = snapshot.val();
-            if (userData) {
-                setCurrentUser(userData);
-                // We don't want to overwrite the localStorage here immediately,
-                // as it might contain fresh data from other tabs.
-                // Instead, we only update if the data is materially different.
-                if (JSON.stringify(userData) !== savedUser) {
-                   localStorage.setItem('currentUser', JSON.stringify(userData));
-                }
+      const savedUserString = localStorage.getItem('currentUser');
+      if (savedUserString) {
+        const savedUser = JSON.parse(savedUserString);
+        
+        const userRef = ref(db, `users/${savedUser.id}`);
+        const listener = onValue(userRef, (snapshot) => {
+            const userDataFromDb = snapshot.val();
+            
+            if (!userDataFromDb) {
+                toast({
+                    title: "Account Not Found",
+                    description: "Your account may have been removed. Logging you out.",
+                    variant: "destructive",
+                });
+                handleLogout();
+                return;
+            }
+
+            if (userDataFromDb.mainAccountUsername !== savedUser.mainAccountUsername) {
+                toast({
+                    title: "Account Details Changed",
+                    description: "Your main account details have changed. Please log in again.",
+                    variant: "destructive",
+                });
+                handleLogout();
+                return;
+            }
+            
+            // Only update state and local storage if there's a material difference
+            const userWithId = { id: savedUser.id, ...userDataFromDb };
+            if (JSON.stringify(userWithId) !== JSON.stringify(currentUser)) {
+               setCurrentUser(userWithId);
+               localStorage.setItem('currentUser', JSON.stringify(userWithId));
             }
         });
         
-        const viewedPostsKey = `viewedPosts_${user.id}`;
+        const viewedPostsKey = `viewedPosts_${savedUser.id}`;
         const storedViewedPosts = JSON.parse(localStorage.getItem(viewedPostsKey) || '[]');
         setViewedPosts(storedViewedPosts);
 
@@ -133,7 +157,7 @@ export default function HomePage() {
         }
       });
     }
-  }, [isClient]);
+  }, [isClient, handleLogout, currentUser]);
 
     // Handle copyright strike expiration and account status
     useEffect(() => {
@@ -174,8 +198,8 @@ export default function HomePage() {
 
                 // Log the user out after a short delay
                 setTimeout(() => {
-                    localStorage.removeItem('currentUser');
-                    window.location.reload();
+                   handleLogout();
+                   window.location.reload();
                 }, 5000);
             }
         }
@@ -184,7 +208,7 @@ export default function HomePage() {
             update(userRef, updates);
         }
 
-    }, [currentUser, toast]);
+    }, [currentUser, toast, handleLogout]);
 
 
   // Reset daily post count if the day has changed (IST)
@@ -522,11 +546,6 @@ export default function HomePage() {
     }
   };
   
-  const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    setCurrentUser(null);
-  };
-  
   const userPosts = useMemo(() => {
     if (!currentUser) return [];
     return posts.filter(post => post.user && post.user.id === currentUser.id);
@@ -583,6 +602,7 @@ export default function HomePage() {
   const today = getISTDateString();
   const postCountToday = currentUser.dailyPostCount?.date === today ? currentUser.dailyPostCount.count : 0;
 
+
   return (
     <div className="flex flex-col h-screen">
       <Header 
@@ -637,3 +657,15 @@ export default function HomePage() {
     </div>
   );
 }
+
+
+export default function HomePage() {
+  return (
+      <HomePageContent />
+  );
+}
+
+
+    
+
+    
